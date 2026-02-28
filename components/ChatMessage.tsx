@@ -1,7 +1,8 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
-import { Mountain, User, Globe, ExternalLink, FileText } from 'lucide-react';
+import Image from 'next/image';
+import { User, Globe, ExternalLink, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -32,11 +33,17 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         isBot ? "flex-row" : "flex-row-reverse"
       )}>
         <div className={cn(
-          "w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border",
-          isBot ? "bg-accent border-accent/20" : "bg-white/10 border-white/10"
+          "shrink-0 flex items-center justify-center",
+          isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border bg-white/10 border-white/10"
         )}>
           {isBot ? (
-            <Mountain size={16} className="text-white" />
+            <Image
+              src="/logo.png"
+              alt="YetiAI"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
           ) : (
             <User size={16} className="text-white" />
           )}
@@ -111,4 +118,4 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-}
+            }
