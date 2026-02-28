@@ -75,8 +75,9 @@ function SidebarContent() {
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col transition-all duration-300",
+              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col",
               !isOpen && "hidden md:flex"
             )}
           >
@@ -183,5 +184,4 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <SidebarContent />;
-                         }
-            
+                    }
