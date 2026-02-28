@@ -1,0 +1,179 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter, useParams, usePathname } from 'next/navigation';
+import { getFirebaseAuth } from '@/lib/firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { localChat, Chat } from '@/lib/localChat';
+import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
+
+function SidebarContent() {
+  const auth = getFirebaseAuth();
+  const [user] = useAuthState(auth);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
+  const chatId = params?.id as string;
+
+  useEffect(() => {
+    if (!user) return;
+
+    const loadChats = () => {
+      const fetchedChats = localChat.getChats(user.uid);
+      setChats(fetchedChats);
+    };
+
+    loadChats();
+    window.addEventListener('storage', loadChats);
+    window.addEventListener('chatUpdated', loadChats);
+    
+    return () => {
+      window.removeEventListener('storage', loadChats);
+      window.removeEventListener('chatUpdated', loadChats);
+    };
+  }, [user]);
+
+  const createNewChat = () => {
+    if (!user) return;
+    const newChat = localChat.createChat(user.uid);
+    window.dispatchEvent(new Event('chatUpdated'));
+    router.push(`/chat/${newChat.id}`);
+    setIsOpen(false);
+  };
+
+  const deleteChat = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    localChat.deleteChat(id);
+    window.dispatchEvent(new Event('chatUpdated'));
+    if (chatId === id) {
+      router.push('/');
+    }
+  };
+
+  const handleLogout = () => {
+    auth.signOut();
+    router.push('/login');
+  };
+
+  return (
+    <>
+      {/* Mobile Toggle */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 p-2 bg-[#151515] rounded-lg border border-white/10 md:hidden"
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      <AnimatePresence>
+        {(isOpen || typeof window !== 'undefined' && window.innerWidth >= 768) && (
+          <motion.aside
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            className={cn(
+              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col transition-all duration-300",
+              !isOpen && "hidden md:flex"
+            )}
+          >
+            <div className="p-4 flex items-center gap-3 mb-4">
+              <div className="relative w-8 h-8 shrink-0">
+                <Image 
+                  src="/logo.png" 
+                  alt="YetiAI Logo" 
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <h1 className="text-xl font-display font-bold">
+                Yeti<span className="text-accent">AI</span>
+              </h1>
+            </div>
+
+            <button
+              onClick={createNewChat}
+              className="mx-4 mb-6 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 py-3 px-4 rounded-xl transition-all group"
+            >
+              <Plus size={18} className="group-hover:text-accent transition-colors" />
+              <span className="font-medium">नयाँ च्याट</span>
+            </button>
+
+            <div className="flex-1 overflow-y-auto px-2 space-y-1">
+              <p className="px-4 text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2">भर्खरका च्याटहरू</p>
+              {chats.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => {
+                    router.push(`/chat/${chat.id}`);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all",
+                    chatId === chat.id 
+                      ? "bg-accent/10 text-accent border border-accent/20" 
+                      : "hover:bg-white/5 text-gray-400 hover:text-white"
+                  )}
+                >
+                  <MessageSquare size={16} className="shrink-0" />
+                  <span className="flex-1 truncate text-sm font-medium">{chat.title || 'नयाँ च्याट'}</span>
+                  <button 
+                    onClick={(e) => deleteChat(e, chat.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-white/5 mt-auto">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 mb-3">
+                <div className="relative w-8 h-8 shrink-0">
+                  <Image 
+                    src={user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'default'}/40/40`} 
+                    alt="Avatar" 
+                    fill
+                    className="rounded-full border border-white/10 object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="flex-1 truncate">
+                  <p className="text-sm font-medium truncate">{user?.displayName}</p>
+                  <p className="text-[10px] text-gray-500 truncate">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+              >
+                <LogOut size={16} />
+                लगआउट
+              </button>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+export default function Sidebar() {
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <SidebarContent />;
+}

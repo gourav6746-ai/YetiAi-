@@ -1,0 +1,5 @@
+{
+  "name": "YetiAI",
+  "description": "Nepal's first AI Assistant powered by Gemini and Firebase.",
+  "requestFramePermissions": ["microphone"]
+}
