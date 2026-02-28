@@ -27,7 +27,7 @@ IDENTITY:
 - You are ONLY YetiAI.`;
 
 export const getGroqClient = () => {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
   if (!apiKey) {
     throw new Error("GROQ_API_KEY is not defined");
   }
