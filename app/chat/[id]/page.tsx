@@ -113,7 +113,7 @@ function ChatPageContent() {
           const searchRes = await fetch('/api/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: text }),
+            body: JSON.stringify({ query: text, userId: user.uid }),
           });
           const searchData = await searchRes.json();
           searchResults = searchData.results || [];
@@ -206,7 +206,7 @@ function ChatPageContent() {
         <div className="animate-pulse text-accent">
           <div className="relative w-12 h-12">
             <Image 
-              src="https://drive.google.com/uc?export=download&id=16rY94DS5YoCQl0NgeFATB4HI1dATJTfq" 
+              src="/logo.png" 
               alt="Loading..." 
               fill
               className="object-contain"
@@ -227,7 +227,7 @@ function ChatPageContent() {
           <div className="flex items-center gap-3">
             <div className="md:hidden relative w-8 h-8 shrink-0">
               <Image 
-                src="https://drive.google.com/uc?export=download&id=16rY94DS5YoCQl0NgeFATB4HI1dATJTfq" 
+                src="/logo.png" 
                 alt="YetiAI Logo" 
                 fill
                 className="object-contain"
@@ -274,7 +274,7 @@ function ChatPageContent() {
                   >
                     <div className="relative w-16 h-16">
                       <Image 
-                        src="https://drive.google.com/uc?export=download&id=16rY94DS5YoCQl0NgeFATB4HI1dATJTfq" 
+                        src="/logo.png" 
                         alt="YetiAI" 
                         fill
                         className="object-contain"
@@ -307,7 +307,7 @@ function ChatPageContent() {
                     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center animate-pulse p-1.5">
                       <div className="relative w-full h-full">
                         <Image 
-                          src="https://drive.google.com/uc?export=download&id=16rY94DS5YoCQl0NgeFATB4HI1dATJTfq" 
+                          src="/logo.png" 
                           alt="AI" 
                           fill
                           className="object-contain brightness-0 invert"
@@ -350,5 +350,5 @@ export default function ChatPage() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <ChatPageContent />;
-      }
-                  
+  }
+            
