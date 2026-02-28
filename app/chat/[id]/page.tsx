@@ -350,5 +350,5 @@ export default function ChatPage() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <ChatPageContent />;
-              }
-            
+      }
+                  
