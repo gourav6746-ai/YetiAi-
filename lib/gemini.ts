@@ -10,7 +10,7 @@ export const getGeminiModel = () => {
 };
 
 export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSyAqqW408jPDttOaGDpclVeYjd-1Sgq5it4";
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "AIzaSyBdsBvFitWRMfd1QUtcPuKIkMb2voCI6Yo";
   if (!apiKey) {
     throw new Error("NEXT_PUBLIC_GEMINI_API_KEY is not defined");
   }
