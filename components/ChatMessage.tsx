@@ -1,7 +1,6 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
-import Image from 'next/image';
 import { Mountain, User, Globe, ExternalLink, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -33,18 +32,11 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         isBot ? "flex-row" : "flex-row-reverse"
       )}>
         <div className={cn(
-          "w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border p-1.5",
+          "w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border",
           isBot ? "bg-accent border-accent/20" : "bg-white/10 border-white/10"
         )}>
           {isBot ? (
-            <div className="relative w-full h-full">
-              <Image 
-                src="/logo.png" 
-                alt="AI" 
-                fill
-                className="object-contain brightness-0 invert"
-              />
-            </div>
+            <Mountain size={16} className="text-white" />
           ) : (
             <User size={16} className="text-white" />
           )}
@@ -57,15 +49,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           {message.file && (
             <div className="rounded-xl overflow-hidden border border-white/10 mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
-                <div className="relative w-full aspect-video min-w-[200px]">
-                  <Image 
-                    src={message.file.data} 
-                    alt="Uploaded" 
-                    fill 
-                    className="object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={message.file.data}
+                  alt="Uploaded"
+                  className="w-full object-cover max-h-64"
+                />
               ) : (
                 <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
                   <div className="bg-accent/20 p-2 rounded-lg">
