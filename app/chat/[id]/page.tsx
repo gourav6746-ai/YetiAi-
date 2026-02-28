@@ -135,29 +135,23 @@ function ChatPageContent() {
         const base64Data = attachedFile.data.split(',')[1];
         const mimeType = attachedFile.mimeType;
         
-        const result = await chat.sendMessageStream({
+        const result = await chat.sendMessage({
           message: [
             { text: promptText || "Analyze this attachment." },
             { inlineData: { data: base64Data, mimeType } }
           ]
         });
 
-        for await (const chunk of result) {
-          const chunkText = chunk.text;
-          fullResponse += chunkText;
-          setStreamingText(fullResponse);
-        }
+        fullResponse = result.text || "";
+        setStreamingText(fullResponse);
       } else {
         // Standard text chat
-        const result = await chat.sendMessageStream({
+        const result = await chat.sendMessage({
           message: promptText
         });
 
-        for await (const chunk of result) {
-          const chunkText = chunk.text;
-          fullResponse += chunkText;
-          setStreamingText(fullResponse);
-        }
+        fullResponse = result.text || "";
+        setStreamingText(fullResponse);
       }
 
       // 5. Save bot response locally
@@ -356,4 +350,5 @@ export default function ChatPage() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <ChatPageContent />;
-}
+              }
+            
