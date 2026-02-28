@@ -1,4 +1,5 @@
 import Groq from "groq-sdk";
+import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 
 const SYSTEM_INSTRUCTION = `You are YetiAI 🏔️, Nepal's first AI Assistant, launched in 2026.
 
@@ -35,32 +36,37 @@ export const getGroqClient = () => {
 
 export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
   const client = getGroqClient();
-  const finalInstruction = systemContext 
-    ? `${SYSTEM_INSTRUCTION}\n\n${systemContext}` 
+  const finalInstruction = systemContext
+    ? `${SYSTEM_INSTRUCTION}\n\n${systemContext}`
     : SYSTEM_INSTRUCTION;
 
-  const groqHistory = history.map((msg: any) => ({
-    role: msg.role === "model" ? "assistant" : "user",
+  const groqHistory: ChatCompletionMessageParam[] = history.map((msg: any) => ({
+    role: (msg.role === "model" ? "assistant" : "user") as "assistant" | "user",
     content: msg.parts?.[0]?.text || msg.content || "",
   }));
 
   return {
     sendMessage: async (params: any) => {
-      let userContent: any = "";
+      let userContent = "";
 
       if (typeof params === "string") {
         userContent = params;
       } else if (params?.message) {
-        userContent = params.message;
+        if (typeof params.message === "string") {
+          userContent = params.message;
+        } else if (Array.isArray(params.message)) {
+          const textPart = params.message.find((p: any) => p.text);
+          userContent = textPart?.text || "Analyze this.";
+        }
       } else if (Array.isArray(params?.parts)) {
         const textPart = params.parts.find((p: any) => p.text);
         userContent = textPart?.text || "";
       }
 
-      const messages = [
-        { role: "system" as const, content: finalInstruction },
+      const messages: ChatCompletionMessageParam[] = [
+        { role: "system", content: finalInstruction },
         ...groqHistory,
-        { role: "user" as const, content: userContent },
+        { role: "user", content: userContent },
       ];
 
       const response = await client.chat.completions.create({
@@ -70,7 +76,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
       });
 
       const text = response.choices[0]?.message?.content || "";
-      
+
       return {
         text,
         candidates: [{ content: { parts: [{ text }] } }],
@@ -81,7 +87,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
 
 export const getGeminiModel = () => {
   const client = getGroqClient();
-  
+
   return async (params: any) => {
     const contents = Array.isArray(params?.contents) ? params.contents : [];
     const textContent = contents
@@ -90,12 +96,14 @@ export const getGeminiModel = () => {
       .map((p: any) => p.text)
       .join("\n");
 
+    const messages: ChatCompletionMessageParam[] = [
+      { role: "system", content: SYSTEM_INSTRUCTION },
+      { role: "user", content: textContent },
+    ];
+
     const response = await client.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_INSTRUCTION },
-        { role: "user", content: textContent },
-      ],
+      messages,
       max_tokens: 1024,
     });
 
@@ -106,4 +114,3 @@ export const getGeminiModel = () => {
     };
   };
 };
-  
