@@ -46,7 +46,7 @@ IDENTITY CONSTRAINTS:
   const finalInstruction = systemContext ? `${baseInstruction}\n\n${systemContext}` : baseInstruction;
 
   return ai.chats.create({
-    model: "gemini-3-flash-preview",
+    model: "gemini-1.5-flash-preview",
     history: history,
     config: {
       systemInstruction: finalInstruction,
