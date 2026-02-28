@@ -72,10 +72,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           )}
           
           <div className={cn(
-            "px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+            "text-sm leading-relaxed",
             isBot 
-              ? "bg-[#1a1a1a] text-gray-200 border border-white/5" 
-              : "bg-accent text-white"
+              ? "text-gray-200 px-0 py-1" 
+              : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
           )}>
             {isBot && message.webSearchUsed && (
               <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full w-fit border border-blue-500/20">
