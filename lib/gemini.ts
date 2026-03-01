@@ -12,14 +12,9 @@ PRIVACY & IDENTITY RULES:
 - After the first message, NEVER say "Namaste", "Main YetiAI hun", "Aapki kya madad kar sakta hun", or any introduction.
 - Answer directly and naturally like a human.
 
-FORMATTING RULES - VERY IMPORTANT:
-- NEVER use HTML tags like <u>, <b>, <i>, <br>, <p> etc.
-- Use ONLY markdown formatting:
-  - **bold** for bold text
-  - *italic* for italic text
-  - # Heading for headings
-  - - item for lists
-  - \`code\` for code
+FORMATTING RULES:
+- NEVER use HTML tags like <u>, <b>, <i> etc.
+- Use ONLY markdown: **bold**, *italic*, # heading, - list
 - No HTML ever.
 
 PERSONALITY:
@@ -36,67 +31,52 @@ IDENTITY:
 - You are NOT ChatGPT, NOT Google.
 - You are ONLY YetiAI.`;
 
-// ─── Groq for text ───────────────────────────────────────────
+// ─── Groq for text ───────────────────────────────
 export const getGroqClient = () => {
   const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY is not defined");
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-// ─── Hugging Face for images ─────────────────────────────────
-const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
-  const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
-  if (!hfKey) throw new Error("HF_API_KEY is not defined");
+// ─── Gemini for images ───────────────────────────
+const analyzeImageWithGemini = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
+  const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined");
 
-  // Convert base64 to blob
-  const byteString = atob(base64Image);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  const blob = new Blob([ab], { type: mimeType });
-
-  const formData = new FormData();
-  formData.append("inputs", blob);
-
-  // Use BLIP for image captioning
   const response = await fetch(
-    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${hfKey}`,
-      },
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt || "Is image ke baare mein detail me batao. Nepali ya Hindi me jawab do." },
+            {
+              inline_data: {
+                mime_type: mimeType,
+                data: base64Image
+              }
+            }
+          ]
+        }],
+        systemInstruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }]
+        }
+      })
     }
   );
 
   if (!response.ok) {
-    throw new Error("Image analysis failed");
+    const err = await response.json();
+    throw new Error(err?.error?.message || "Image analysis failed");
   }
 
-  const result = await response.json();
-  const caption = Array.isArray(result) ? result[0]?.generated_text : result?.generated_text;
-
-  // Now use Groq to give a detailed response based on caption + user prompt
-  const groq = getGroqClient();
-  const groqResponse = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: SYSTEM_INSTRUCTION },
-      {
-        role: "user",
-        content: `Image me yeh dikh raha hai: "${caption}"\n\nUser ka sawaal: ${prompt || "Is photo ke baare mein batao"}`
-      }
-    ],
-    max_tokens: 1024,
-  });
-
-  return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
+  const data = await response.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Image analyze nahi ho saki.";
 };
 
-// ─── Main chat function ───────────────────────────────────────
+// ─── Main chat ───────────────────────────────────
 export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
   const client = getGroqClient();
   const finalInstruction = systemContext
@@ -110,25 +90,22 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
 
   return {
     sendMessage: async (params: any) => {
-      // Check if image is attached
+      // Image attached
       if (Array.isArray(params?.message)) {
         const textPart = params.message.find((p: any) => p.text);
         const imagePart = params.message.find((p: any) => p.inlineData);
 
         if (imagePart?.inlineData) {
-          const text = await analyzeImageWithHF(
+          const text = await analyzeImageWithGemini(
             imagePart.inlineData.data,
             imagePart.inlineData.mimeType,
             textPart?.text || ""
           );
-          return {
-            text,
-            candidates: [{ content: { parts: [{ text }] } }],
-          };
+          return { text, candidates: [{ content: { parts: [{ text }] } }] };
         }
       }
 
-      // Normal text chat
+      // Normal text
       let userContent = "";
       if (typeof params === "string") {
         userContent = params;
@@ -152,10 +129,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
       });
 
       const text = response.choices[0]?.message?.content || "";
-      return {
-        text,
-        candidates: [{ content: { parts: [{ text }] } }],
-      };
+      return { text, candidates: [{ content: { parts: [{ text }] } }] };
     },
   };
 };
