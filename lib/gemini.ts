@@ -46,10 +46,16 @@ IMAGE GENERATION RULE:
 - Do not add any other text when generating an image.
 
 WEB IMAGE SEARCH RULE:
-- If the user asks to "show", "dikhao", "search", "find" a photo/image of something real (like "car dikhao", "cat ki photo", "Eiffel Tower dikhao").
-- Respond ONLY with this exact format: [SEARCH_IMAGE: search query in English].
-- Example: "car dikhao" -> [SEARCH_IMAGE: car], "Everest photo" -> [SEARCH_IMAGE: Mount Everest Nepal].
-- Do not add any other text when searching an image.
+- For ANY topic or question where showing a real image would be helpful (animals, places, food, people, objects, nature, sports, etc.), ALWAYS include [SEARCH_IMAGE: query] at the END of your response.
+- If user explicitly asks to show/dikhao/search an image, put [SEARCH_IMAGE: query] as the ONLY response.
+- If user asks about a topic (like "cat ke baare mein batao", "Eiffel Tower kya hai", "car ki jankari do"), give your normal text answer FIRST, then add [SEARCH_IMAGE: query] at the very end.
+- Examples:
+  - "cat ke baare mein batao" -> full text answer + [SEARCH_IMAGE: cat]
+  - "Everest kya hai" -> full text answer + [SEARCH_IMAGE: Mount Everest Nepal]
+  - "car dikhao" -> [SEARCH_IMAGE: car]
+  - "momo recipe" -> full text answer + [SEARCH_IMAGE: Nepali momo dish]
+  - "Nepal ke baare mein" -> full text answer + [SEARCH_IMAGE: Nepal landscape]
+- Do NOT add [SEARCH_IMAGE] for math, coding, general knowledge without visual context, or personal questions.
 `;
 
 
@@ -205,36 +211,56 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
         const searchMatch = text.match(/\[SEARCH_IMAGE: (.*?)\]/);
         if (searchMatch) {
           const searchQuery = searchMatch[1];
+          const cleanText = text.replace(/\[SEARCH_IMAGE:.*?\]/g, "").trim();
+
+          let imageUrl = "";
+          let photographer = "";
+
           try {
-            const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
-            if (!unsplashKey) throw new Error("UNSPLASH_KEY missing");
-
-            const unsplashRes = await fetch(
-              `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
-              {
-                headers: {
-                  Authorization: `Client-ID ${unsplashKey}`,
-                },
+            // PRIMARY: Pexels
+            const pexelsKey = process.env.NEXT_PUBLIC_PEXELS_API_KEY;
+            if (pexelsKey) {
+              const pexelsRes = await fetch(
+                `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
+                { headers: { Authorization: pexelsKey } }
+              );
+              if (pexelsRes.ok) {
+                const pexelsData = await pexelsRes.json();
+                imageUrl = pexelsData.photos?.[0]?.src?.large || "";
+                photographer = pexelsData.photos?.[0]?.photographer || "Pexels";
               }
-            );
+            }
 
-            if (!unsplashRes.ok) throw new Error(`Unsplash error: ${unsplashRes.status}`);
-
-            const data = await unsplashRes.json();
-            const imageUrl = data.results?.[0]?.urls?.regular;
-            const photographer = data.results?.[0]?.user?.name || "Unsplash";
+            // FALLBACK: Unsplash (agar Pexels se nahi mila)
+            if (!imageUrl) {
+              const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
+              if (unsplashKey) {
+                const unsplashRes = await fetch(
+                  `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
+                  { headers: { Authorization: `Client-ID ${unsplashKey}` } }
+                );
+                if (unsplashRes.ok) {
+                  const unsplashData = await unsplashRes.json();
+                  imageUrl = unsplashData.results?.[0]?.urls?.regular || "";
+                  photographer = unsplashData.results?.[0]?.user?.name || "Unsplash";
+                }
+              }
+            }
 
             if (imageUrl) {
-              const finalResponse = `YETI_WEB_IMAGE:${imageUrl}|${photographer}|${searchQuery}`;
+              const imageTag = `YETI_WEB_IMAGE:${imageUrl}|${photographer}|${searchQuery}`;
+              const finalResponse = cleanText ? `${cleanText}
+
+${imageTag}` : imageTag;
               return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
             } else {
-              const errText = `"${searchQuery}" ki koi image nahi mili. Kuch aur try karein. 🏔️`;
-              return { text: errText, candidates: [{ content: { parts: [{ text: errText }] } }] };
+              const finalResponse = cleanText || `"${searchQuery}" ki koi image nahi mili. 🏔️`;
+              return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
             }
           } catch (err) {
-            console.error("Unsplash search failed:", err);
-            const errText = "Image search nahi ho saka. Dobara try karein. 🏔️";
-            return { text: errText, candidates: [{ content: { parts: [{ text: errText }] } }] };
+            console.error("Image search failed:", err);
+            const finalResponse = cleanText || "Image search nahi ho saka. Dobara try karein. 🏔️";
+            return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
           }
         }
       }
@@ -270,4 +296,4 @@ export const getGeminiModel = () => {
   };
 };
 
-          
+        
