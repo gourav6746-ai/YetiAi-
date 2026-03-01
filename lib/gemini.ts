@@ -119,10 +119,21 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
     ? `${SYSTEM_INSTRUCTION}\n\n${systemContext}`
     : SYSTEM_INSTRUCTION;
 
-  const groqHistory: ChatCompletionMessageParam[] = history.map((msg: any) => ({
-    role: (msg.role === "model" ? "assistant" : "user") as "assistant" | "user",
-    content: msg.parts?.[0]?.text || msg.content || "",
-  }));
+  // Filter history: remove image base64 data (too large for token limit)
+  const groqHistory: ChatCompletionMessageParam[] = history
+    .map((msg: any) => {
+      let content = msg.parts?.[0]?.text || msg.content || "";
+      // Remove base64 image data from history to prevent token overflow
+      if (content.startsWith("YETI_IMAGE_URL:data:")) {
+        content = "[Image generated successfully]";
+      }
+      return {
+        role: (msg.role === "model" ? "assistant" : "user") as "assistant" | "user",
+        content,
+      };
+    })
+    // Only keep last 10 messages to avoid token limit
+    .slice(-10);
 
   return {
     sendMessage: async (params: any) => {
@@ -236,4 +247,4 @@ export const getGeminiModel = () => {
   };
 };
 
-    
+              
