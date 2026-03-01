@@ -49,9 +49,6 @@ const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt:
   for (let i = 0; i < byteString.length; i++) {
     ia[i] = byteString.charCodeAt(i);
   }
-  const blob = new Blob([ab], { type: mimeType });
-  const formData = new FormData();
-  formData.append("inputs", blob);
 
   const models = [
     "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
@@ -63,8 +60,11 @@ const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt:
     try {
       const response = await fetch(modelUrl, {
         method: "POST",
-        headers: { Authorization: `Bearer ${hfKey}` },
-        body: formData,
+        headers: { 
+          Authorization: `Bearer ${hfKey}`,
+          "Content-Type": mimeType,
+        },
+        body: ab,
       });
       if (response.ok) {
         const result = await response.json();
