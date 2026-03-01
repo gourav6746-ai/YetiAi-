@@ -38,6 +38,12 @@ STRICT RESTRICTIONS:
 
 IMAGE ANALYSIS CONTEXT:
 - When analyzing images (via captions provided), connect the visual data with your vast knowledge to give a meaningful description, not just a literal one.
+
+IMAGE GENERATION RULE:
+- If the user asks to "generate", "create", "make", or "draw" an image/photo/art.
+- Respond ONLY with this exact format: [GENERATE_IMAGE: descriptive prompt in English].
+- Example: If user says "Momo ki photo banao", you reply: [GENERATE_IMAGE: A delicious plate of steaming Nepali momos with spicy chutney, cinematic lighting].
+- Do not add any other text when generating an image.
 `;
 
 
@@ -48,7 +54,7 @@ export const getGroqClient = () => {
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-// ─── Hugging Face for images ─────────────────────
+// ─── Hugging Face for images (REMAINS UNTOUCHED) ───
 const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
   const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
   if (!hfKey) throw new Error("HF_API_KEY is not defined");
@@ -106,7 +112,7 @@ const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt:
   return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
 };
 
-// ─── Main chat ───────────────────────────────────
+// ─── Main chat (UPDATED WITH IMAGE GENERATION) ────
 export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
   const client = getGroqClient();
   const finalInstruction = systemContext
@@ -120,7 +126,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
 
   return {
     sendMessage: async (params: any) => {
-      // Image attached
+      // Image analysis part (REMAINS UNTOUCHED)
       if (Array.isArray(params?.message)) {
         const textPart = params.message.find((p: any) => p.text);
         const imagePart = params.message.find((p: any) => p.inlineData);
@@ -135,7 +141,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
         }
       }
 
-      // Normal text
+      // Normal text logic (UPDATED TO HANDLE POLLINATIONS)
       let userContent = "";
       if (typeof params === "string") {
         userContent = params;
@@ -159,6 +165,18 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
       });
 
       const text = response.choices[0]?.message?.content || "";
+
+      // Check if AI wants to generate an image
+      if (text.includes("[GENERATE_IMAGE:")) {
+        const promptMatch = text.match(/\[GENERATE_IMAGE: (.*?)\]/);
+        if (promptMatch) {
+          const imagePrompt = promptMatch[1];
+          const generatedUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024&nologo=true&model=flux`;
+          const finalResponse = `YETI_IMAGE_URL:${generatedUrl}`;
+          return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
+        }
+      }
+
       return { text, candidates: [{ content: { parts: [{ text }] } }] };
     },
   };
@@ -189,4 +207,4 @@ export const getGeminiModel = () => {
     return { text, candidates: [{ content: { parts: [{ text }] } }] };
   };
 };
-              
+        
