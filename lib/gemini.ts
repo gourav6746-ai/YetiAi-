@@ -179,3 +179,4 @@ export const getGeminiModel = () => {
     return { text, candidates: [{ content: { parts: [{ text }] } }] };
   };
 };
+              
