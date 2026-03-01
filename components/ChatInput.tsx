@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Send, X, FileText, Plus, Image as ImageIcon, Camera, Globe } from 'lucide-react';
+import { Send, X, FileText, Plus, Image as ImageIcon, Camera, Globe, Mic, MicOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -25,9 +25,51 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'ne-NP'; // Nepali default
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(prev => prev + transcript);
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  const toggleVoice = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'file' | 'camera') => {
     const file = e.target.files?.[0];
@@ -48,7 +90,6 @@ export default function ChatInput({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if ((!input.trim() && !attachedFile) || disabled) return;
-    
     onSendMessage(input);
     setInput('');
   };
@@ -153,7 +194,6 @@ export default function ChatInput({
                       alt="Preview" 
                       fill 
                       className="rounded-lg object-cover border border-white/10"
-                      referrerPolicy="no-referrer"
                     />
                   </div>
                 ) : (
@@ -165,7 +205,7 @@ export default function ChatInput({
                 <button
                   type="button"
                   onClick={() => setAttachedFile(null)}
-                  className="absolute -top-2 -right-2 bg-accent text-white rounded-full p-1 shadow-lg hover:bg-accent-hover transition-colors"
+                  className="absolute -top-2 -right-2 bg-accent text-white rounded-full p-1 shadow-lg"
                 >
                   <X size={12} />
                 </button>
@@ -186,7 +226,7 @@ export default function ChatInput({
 
           <div className="flex-1 relative flex items-center">
             {webSearchEnabled && (
-              <div className="absolute left-3 z-10 flex items-center gap-1.5 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30 animate-in fade-in zoom-in duration-300">
+              <div className="absolute left-3 z-10 flex items-center gap-1.5 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30">
                 <Globe size={12} />
                 <span className="text-[10px] font-bold uppercase hidden xs:inline">Web</span>
               </div>
@@ -200,7 +240,7 @@ export default function ChatInput({
                   handleSubmit(e);
                 }
               }}
-              placeholder="YetiAI लाई केहि सोध्नुहोस्..."
+              placeholder={isListening ? "🎤 Sun raha hun..." : "YetiAI लाई केहि सोध्नुहोस्..."}
               className={cn(
                 "flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none transition-all",
                 webSearchEnabled ? "pl-16 md:pl-20" : "px-4"
@@ -210,10 +250,25 @@ export default function ChatInput({
             />
           </div>
 
+          {/* Mic Button */}
+          <button
+            type="button"
+            onClick={toggleVoice}
+            disabled={disabled}
+            className={cn(
+              "p-3 rounded-xl transition-all shrink-0 active:scale-95",
+              isListening 
+                ? "bg-red-500 text-white animate-pulse" 
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            )}
+          >
+            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
+
           <button
             type="submit"
             disabled={(!input.trim() && !attachedFile) || disabled}
-            className="p-3 bg-accent text-white rounded-xl hover:bg-accent-hover disabled:opacity-50 disabled:hover:bg-accent transition-all shrink-0 active:scale-95"
+            className="p-3 bg-accent text-white rounded-xl hover:bg-accent-hover disabled:opacity-50 transition-all shrink-0 active:scale-95"
           >
             <Send size={20} />
           </button>
@@ -224,4 +279,5 @@ export default function ChatInput({
       </p>
     </div>
   );
-}
+    }
+      
