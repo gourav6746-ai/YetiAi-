@@ -38,42 +38,62 @@ export const getGroqClient = () => {
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-// ─── Gemini for images ───────────────────────────
-const analyzeImageWithGemini = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
-  const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-  if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined");
+// ─── Hugging Face for images ─────────────────────
+const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
+  const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
+  if (!hfKey) throw new Error("HF_API_KEY is not defined");
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt || "Is image ke baare mein detail me batao. Nepali ya Hindi me jawab do." },
-            {
-              inline_data: {
-                mime_type: mimeType,
-                data: base64Image
-              }
-            }
-          ]
-        }],
-        systemInstruction: {
-          parts: [{ text: SYSTEM_INSTRUCTION }]
-        }
-      })
+  const byteString = atob(base64Image);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeType });
+  const formData = new FormData();
+  formData.append("inputs", blob);
+
+  const models = [
+    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
+    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-base",
+  ];
+
+  let caption = "";
+  for (const modelUrl of models) {
+    try {
+      const response = await fetch(modelUrl, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${hfKey}` },
+        body: formData,
+      });
+      if (response.ok) {
+        const result = await response.json();
+        caption = Array.isArray(result) ? result[0]?.generated_text : result?.generated_text;
+        if (caption) break;
+      }
+    } catch (e) {
+      continue;
     }
-  );
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err?.error?.message || "Image analysis failed");
   }
 
-  const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Image analyze nahi ho saki.";
+  if (!caption) {
+    caption = "user ne ek image share ki hai";
+  }
+
+  const groq = getGroqClient();
+  const groqResponse = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: SYSTEM_INSTRUCTION },
+      {
+        role: "user",
+        content: `Image me yeh dikh raha hai: "${caption}"\n\nUser ka sawaal: ${prompt || "Is photo ke baare mein detail me batao"}`
+      }
+    ],
+    max_tokens: 1024,
+  });
+
+  return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
 };
 
 // ─── Main chat ───────────────────────────────────
@@ -96,7 +116,7 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
         const imagePart = params.message.find((p: any) => p.inlineData);
 
         if (imagePart?.inlineData) {
-          const text = await analyzeImageWithGemini(
+          const text = await analyzeImageWithHF(
             imagePart.inlineData.data,
             imagePart.inlineData.mimeType,
             textPart?.text || ""
