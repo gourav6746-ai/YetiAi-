@@ -171,9 +171,37 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
         const promptMatch = text.match(/\[GENERATE_IMAGE: (.*?)\]/);
         if (promptMatch) {
           const imagePrompt = promptMatch[1];
-          const generatedUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024&nologo=true&model=flux`;
-          const finalResponse = `YETI_IMAGE_URL:${generatedUrl}`;
-          return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
+          try {
+            const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
+            if (!hfKey) throw new Error("HF_API_KEY missing");
+
+            const hfResponse = await fetch(
+              "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${hfKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ inputs: imagePrompt }),
+              }
+            );
+
+            if (!hfResponse.ok) throw new Error(`HF error: ${hfResponse.status}`);
+
+            const blob = await hfResponse.blob();
+            const arrayBuffer = await blob.arrayBuffer();
+            const base64 = btoa(
+              new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+            );
+            const dataUrl = `data:image/jpeg;base64,${base64}`;
+            const finalResponse = `YETI_IMAGE_URL:${dataUrl}`;
+            return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
+          } catch (imgErr) {
+            console.error("Image generation failed:", imgErr);
+            const errText = "Image generate nahi ho saki. Please dobara try karein. 🏔️";
+            return { text: errText, candidates: [{ content: { parts: [{ text: errText }] } }] };
+          }
         }
       }
 
@@ -207,4 +235,5 @@ export const getGeminiModel = () => {
     return { text, candidates: [{ content: { parts: [{ text }] } }] };
   };
 };
-        
+
+    
