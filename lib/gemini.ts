@@ -36,14 +36,67 @@ IDENTITY:
 - You are NOT ChatGPT, NOT Google.
 - You are ONLY YetiAI.`;
 
+// ─── Groq for text ───────────────────────────────────────────
 export const getGroqClient = () => {
   const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not defined");
-  }
+  if (!apiKey) throw new Error("GROQ_API_KEY is not defined");
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
+// ─── Hugging Face for images ─────────────────────────────────
+const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
+  const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
+  if (!hfKey) throw new Error("HF_API_KEY is not defined");
+
+  // Convert base64 to blob
+  const byteString = atob(base64Image);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeType });
+
+  const formData = new FormData();
+  formData.append("inputs", blob);
+
+  // Use BLIP for image captioning
+  const response = await fetch(
+    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${hfKey}`,
+      },
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Image analysis failed");
+  }
+
+  const result = await response.json();
+  const caption = Array.isArray(result) ? result[0]?.generated_text : result?.generated_text;
+
+  // Now use Groq to give a detailed response based on caption + user prompt
+  const groq = getGroqClient();
+  const groqResponse = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: SYSTEM_INSTRUCTION },
+      {
+        role: "user",
+        content: `Image me yeh dikh raha hai: "${caption}"\n\nUser ka sawaal: ${prompt || "Is photo ke baare mein batao"}`
+      }
+    ],
+    max_tokens: 1024,
+  });
+
+  return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
+};
+
+// ─── Main chat function ───────────────────────────────────────
 export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
   const client = getGroqClient();
   const finalInstruction = systemContext
@@ -57,19 +110,32 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
 
   return {
     sendMessage: async (params: any) => {
-      let userContent = "";
+      // Check if image is attached
+      if (Array.isArray(params?.message)) {
+        const textPart = params.message.find((p: any) => p.text);
+        const imagePart = params.message.find((p: any) => p.inlineData);
 
+        if (imagePart?.inlineData) {
+          const text = await analyzeImageWithHF(
+            imagePart.inlineData.data,
+            imagePart.inlineData.mimeType,
+            textPart?.text || ""
+          );
+          return {
+            text,
+            candidates: [{ content: { parts: [{ text }] } }],
+          };
+        }
+      }
+
+      // Normal text chat
+      let userContent = "";
       if (typeof params === "string") {
         userContent = params;
-      } else if (params?.message) {
-        if (typeof params.message === "string") {
-          userContent = params.message;
-        } else if (Array.isArray(params.message)) {
-          const textPart = params.message.find((p: any) => p.text);
-          userContent = textPart?.text || "Analyze this.";
-        }
-      } else if (Array.isArray(params?.parts)) {
-        const textPart = params.parts.find((p: any) => p.text);
+      } else if (typeof params?.message === "string") {
+        userContent = params.message;
+      } else if (Array.isArray(params?.message)) {
+        const textPart = params.message.find((p: any) => p.text);
         userContent = textPart?.text || "";
       }
 
@@ -86,7 +152,6 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
       });
 
       const text = response.choices[0]?.message?.content || "";
-
       return {
         text,
         candidates: [{ content: { parts: [{ text }] } }],
@@ -97,7 +162,6 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
 
 export const getGeminiModel = () => {
   const client = getGroqClient();
-
   return async (params: any) => {
     const contents = Array.isArray(params?.contents) ? params.contents : [];
     const textContent = contents
@@ -118,9 +182,6 @@ export const getGeminiModel = () => {
     });
 
     const text = response.choices[0]?.message?.content || "";
-    return {
-      text,
-      candidates: [{ content: { parts: [{ text }] } }],
-    };
+    return { text, candidates: [{ content: { parts: [{ text }] } }] };
   };
 };
