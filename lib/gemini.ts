@@ -54,62 +54,40 @@ export const getGroqClient = () => {
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-// ─── Hugging Face for images (REMAINS UNTOUCHED) ───
+// ─── Groq Vision for images (Direct image analysis - reads text too) ───
 const analyzeImageWithHF = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
-  const hfKey = process.env.NEXT_PUBLIC_HF_API_KEY;
-  if (!hfKey) throw new Error("HF_API_KEY is not defined");
-
-  const byteString = atob(base64Image);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-
-  const models = [
-    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-large",
-    "https://router.huggingface.co/hf-inference/models/Salesforce/blip-image-captioning-base",
-  ];
-
-  let caption = "";
-  for (const modelUrl of models) {
-    try {
-      const response = await fetch(modelUrl, {
-        method: "POST",
-        headers: { 
-          Authorization: `Bearer ${hfKey}`,
-          "Content-Type": mimeType,
-        },
-        body: ab,
-      });
-      if (response.ok) {
-        const result = await response.json();
-        caption = Array.isArray(result) ? result[0]?.generated_text : result?.generated_text;
-        if (caption) break;
-      }
-    } catch (e) {
-      continue;
-    }
-  }
-
-  if (!caption) {
-    caption = "user ne ek image share ki hai";
-  }
-
   const groq = getGroqClient();
-  const groqResponse = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: SYSTEM_INSTRUCTION },
-      {
-        role: "user",
-        content: `Image me yeh dikh raha hai: "${caption}"\n\nUser ka sawaal: ${prompt || "Is photo ke baare mein detail me batao"}`
-      }
-    ],
-    max_tokens: 1024,
-  });
 
-  return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
+  try {
+    // Use Groq vision model - directly sees image, reads text, understands everything
+    const groqResponse = await groq.chat.completions.create({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [
+        { role: "system", content: SYSTEM_INSTRUCTION },
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${base64Image}`,
+              },
+            },
+            {
+              type: "text",
+              text: prompt || "Is image mein kya hai? Detail mein batao. Agar koi text likha hai toh woh bhi batao.",
+            },
+          ],
+        },
+      ],
+      max_tokens: 1024,
+    });
+
+    return groqResponse.choices[0]?.message?.content || "Image analyze nahi ho saki.";
+  } catch (err) {
+    console.error("Groq vision failed:", err);
+    return "Image analyze nahi ho saki. Dobara try karein. 🏔️";
+  }
 };
 
 // ─── Main chat (UPDATED WITH IMAGE GENERATION) ────
@@ -247,4 +225,4 @@ export const getGeminiModel = () => {
   };
 };
 
-              
+      
