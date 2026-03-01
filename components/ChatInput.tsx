@@ -37,7 +37,7 @@ export default function ChatInput({
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = true;
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.lang = 'hi-IN';
 
@@ -46,19 +46,18 @@ export default function ChatInput({
           let finalTranscript = '';
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += transcript;
+              finalTranscript += event.results[i][0].transcript;
             } else {
-              interimTranscript += transcript;
+              interimTranscript += event.results[i][0].transcript;
             }
           }
 
           if (finalTranscript) {
-            finalTranscriptRef.current += finalTranscript;
+            finalTranscriptRef.current = finalTranscriptRef.current + finalTranscript;
           }
 
-          // Show live text while speaking
+          // Show live text - final + interim only once
           setInput(finalTranscriptRef.current + interimTranscript);
         };
 
@@ -259,5 +258,5 @@ export default function ChatInput({
       </p>
     </div>
   );
-      }
-          
+        }
+                    
