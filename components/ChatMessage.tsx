@@ -77,7 +77,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               )}
             </div>
           )}
-          
+  
           <div className={cn(
             "text-sm leading-relaxed",
             isBot 
@@ -91,7 +91,32 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               </div>
             )}
             <div className="markdown-body">
-              <ReactMarkdown>{message.text}</ReactMarkdown>
+              {/* --- NAYA CODE SIRF YAHAN ADD KIYA HAI --- */}
+              {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
+                <div className="flex flex-col gap-3 mt-1">
+                  <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={message.text.replace('YETI_IMAGE_URL:', '')} 
+                      alt="YetiAI Generated" 
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <a 
+                         href={message.text.replace('YETI_IMAGE_URL:', '')} 
+                         target="_blank" 
+                         className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                       >
+                         Download Image 🏔️
+                       </a>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-gray-500 italic">YetiAI ne yeh image aapke liye banayi hai.</p>
+                </div>
+              ) : (
+                <ReactMarkdown>{message.text}</ReactMarkdown>
+              )}
+              {/* --- NAYA CODE KHATAM --- */}
             </div>
           </div>
 
@@ -118,4 +143,4 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-            }
+                    }
