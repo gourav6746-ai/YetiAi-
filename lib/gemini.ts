@@ -44,6 +44,12 @@ IMAGE GENERATION RULE:
 - Respond ONLY with this exact format: [GENERATE_IMAGE: descriptive prompt in English].
 - Example: If user says "Momo ki photo banao", you reply: [GENERATE_IMAGE: A delicious plate of steaming Nepali momos with spicy chutney, cinematic lighting].
 - Do not add any other text when generating an image.
+
+WEB IMAGE SEARCH RULE:
+- If the user asks to "show", "dikhao", "search", "find" a photo/image of something real (like "car dikhao", "cat ki photo", "Eiffel Tower dikhao").
+- Respond ONLY with this exact format: [SEARCH_IMAGE: search query in English].
+- Example: "car dikhao" -> [SEARCH_IMAGE: car], "Everest photo" -> [SEARCH_IMAGE: Mount Everest Nepal].
+- Do not add any other text when searching an image.
 `;
 
 
@@ -194,6 +200,45 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
         }
       }
 
+      // Check if AI wants to search a web image
+      if (text.includes("[SEARCH_IMAGE:")) {
+        const searchMatch = text.match(/\[SEARCH_IMAGE: (.*?)\]/);
+        if (searchMatch) {
+          const searchQuery = searchMatch[1];
+          try {
+            const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
+            if (!unsplashKey) throw new Error("UNSPLASH_KEY missing");
+
+            const unsplashRes = await fetch(
+              `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
+              {
+                headers: {
+                  Authorization: `Client-ID ${unsplashKey}`,
+                },
+              }
+            );
+
+            if (!unsplashRes.ok) throw new Error(`Unsplash error: ${unsplashRes.status}`);
+
+            const data = await unsplashRes.json();
+            const imageUrl = data.results?.[0]?.urls?.regular;
+            const photographer = data.results?.[0]?.user?.name || "Unsplash";
+
+            if (imageUrl) {
+              const finalResponse = `YETI_WEB_IMAGE:${imageUrl}|${photographer}|${searchQuery}`;
+              return { text: finalResponse, candidates: [{ content: { parts: [{ text: finalResponse }] } }] };
+            } else {
+              const errText = `"${searchQuery}" ki koi image nahi mili. Kuch aur try karein. 🏔️`;
+              return { text: errText, candidates: [{ content: { parts: [{ text: errText }] } }] };
+            }
+          } catch (err) {
+            console.error("Unsplash search failed:", err);
+            const errText = "Image search nahi ho saka. Dobara try karein. 🏔️";
+            return { text: errText, candidates: [{ content: { parts: [{ text: errText }] } }] };
+          }
+        }
+      }
+
       return { text, candidates: [{ content: { parts: [{ text }] } }] };
     },
   };
@@ -225,4 +270,4 @@ export const getGeminiModel = () => {
   };
 };
 
-      
+          
