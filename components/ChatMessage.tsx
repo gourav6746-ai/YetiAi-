@@ -130,34 +130,48 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                   </div>
                   <p className="text-[10px] text-gray-500 italic">YetiAI ne yeh image aapke liye banayi hai.</p>
                 </div>
-              ) : message.text.startsWith('YETI_WEB_IMAGE:') ? (
+              ) : message.text.includes('YETI_WEB_IMAGE:') ? (
                 (() => {
-                  const parts = message.text.replace('YETI_WEB_IMAGE:', '').split('|');
-                  const imgUrl = parts[0];
-                  const photographer = parts[1] || 'Unsplash';
-                  const query = parts[2] || '';
+                  // Split on YETI_WEB_IMAGE: tag
+                  const splitIdx = message.text.indexOf('YETI_WEB_IMAGE:');
+                  const textPart = message.text.substring(0, splitIdx).trim();
+                  const imgPart = message.text.substring(splitIdx + 'YETI_WEB_IMAGE:'.length);
+                  // imgPart format: url|photographer|query
+                  const firstPipe = imgPart.indexOf('|');
+                  const secondPipe = imgPart.indexOf('|', firstPipe + 1);
+                  const imgUrl = imgPart.substring(0, firstPipe);
+                  const photographer = firstPipe !== -1 ? imgPart.substring(firstPipe + 1, secondPipe !== -1 ? secondPipe : undefined) : 'Pexels';
+                  const query = secondPipe !== -1 ? imgPart.substring(secondPipe + 1).trim() : '';
+                  if (!imgUrl) return <ReactMarkdown>{message.text}</ReactMarkdown>;
                   return (
-                    <div className="flex flex-col gap-2 mt-1">
-                      <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={imgUrl}
-                          alt={query}
-                          className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <a
-                            href={imgUrl}
-                            target="_blank"
-                            className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
-                          >
-                            Full Size Dekho 🔍
-                          </a>
+                    <div className="flex flex-col gap-3">
+                      {textPart && (
+                        <div className="markdown-body">
+                          <ReactMarkdown>{textPart}</ReactMarkdown>
                         </div>
+                      )}
+                      <div className="flex flex-col gap-2 mt-1">
+                        <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imgUrl}
+                            alt={query}
+                            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a
+                              href={imgUrl}
+                              target="_blank"
+                              className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                            >
+                              Full Size Dekho 🔍
+                            </a>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 italic">
+                          📷 Photo by <span className="text-gray-400">{photographer}</span> on Unsplash
+                        </p>
                       </div>
-                      <p className="text-[10px] text-gray-500 italic">
-                        📷 Photo by <span className="text-gray-400">{photographer}</span> on Unsplash
-                      </p>
                     </div>
                   );
                 })()
@@ -191,4 +205,4 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-              }
+}
