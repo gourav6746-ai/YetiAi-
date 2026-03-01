@@ -2,10 +2,9 @@
 
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
-import { User, Globe, ExternalLink, FileText } from 'lucide-react';
+import { User, Globe, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface ChatMessageProps {
   message: {
@@ -19,8 +18,6 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ message }: ChatMessageProps) {
   const isBot = message.role === 'model';
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
 
   return (
     <motion.div
@@ -59,12 +56,25 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           {message.file && (
             <div className="rounded-xl overflow-hidden border border-white/10 mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={message.file.data}
-                  alt="Uploaded"
-                  className="w-full object-cover max-h-64"
-                />
+                message.file.data ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={message.file.data}
+                    alt="Uploaded"
+                    className="w-full object-cover max-h-64"
+                  />
+                ) : (
+                  // Image data stripped from storage - show placeholder
+                  <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
+                    <div className="bg-accent/20 p-2 rounded-lg">
+                      <ImageIcon size={20} className="text-accent" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium text-gray-200">{message.file.name || 'Image'}</span>
+                      <span className="text-[10px] text-gray-500">Image (session mein hi dikhti hai)</span>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
                   <div className="bg-accent/20 p-2 rounded-lg">
@@ -74,7 +84,11 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                     <span className="text-xs font-medium text-gray-200 truncate max-w-[200px]">
                       {message.file.name || 'Document.pdf'}
                     </span>
-                    <span className="text-[10px] text-gray-500 uppercase">PDF Document</span>
+                    <span className="text-[10px] text-gray-500 uppercase">
+                      {message.file.mimeType.includes('pdf') ? 'PDF Document' : 
+                       message.file.mimeType.includes('word') || message.file.mimeType.includes('doc') ? 'Word Document' :
+                       message.file.mimeType.includes('text') ? 'Text File' : 'Document'}
+                    </span>
                   </div>
                 </div>
               )}
@@ -98,48 +112,21 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                 <div className="flex flex-col gap-3 mt-1">
                   <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
-                    {/* Loading state */}
-                    {!imgLoaded && !imgError && (
-                      <div className="w-full h-64 bg-white/5 flex flex-col items-center justify-center gap-3 rounded-xl">
-                        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                        <p className="text-xs text-gray-400">Image generate ho rahi hai... 🏔️</p>
-                      </div>
-                    )}
-                    {/* Error state */}
-                    {imgError && (
-                      <div className="w-full h-40 bg-red-500/10 flex flex-col items-center justify-center gap-2 rounded-xl border border-red-500/20">
-                        <p className="text-xs text-red-400">Image load nahi hui. Dobara try karein.</p>
-                        <a 
-                          href={message.text.replace('YETI_IMAGE_URL:', '')} 
-                          target="_blank"
-                          className="text-xs text-accent underline"
-                        >
-                          Direct link kholein
-                        </a>
-                      </div>
-                    )}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={message.text.replace('YETI_IMAGE_URL:', '')} 
                       alt="YetiAI Generated" 
-                      className={cn(
-                        "w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105",
-                        !imgLoaded ? "hidden" : "block"
-                      )}
-                      onLoad={() => setImgLoaded(true)}
-                      onError={() => { setImgError(true); setImgLoaded(false); }}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    {imgLoaded && (
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                         <a 
-                           href={message.text.replace('YETI_IMAGE_URL:', '')} 
-                           target="_blank" 
-                           className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
-                         >
-                           Download Image 🏔️
-                         </a>
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <a 
+                         href={message.text.replace('YETI_IMAGE_URL:', '')} 
+                         target="_blank" 
+                         className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                       >
+                         Download Image 🏔️
+                       </a>
+                    </div>
                   </div>
                   <p className="text-[10px] text-gray-500 italic">YetiAI ne yeh image aapke liye banayi hai.</p>
                 </div>
@@ -173,5 +160,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-              }
-                
+          }
+                      
