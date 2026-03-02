@@ -216,7 +216,7 @@ function ChatPageContent() {
 
   if (loadingAuth || !chatData) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
+      <div className="flex items-center justify-center min-h-screen theme-bg">
         <div className="animate-pulse text-accent">
           <div className="relative w-12 h-12">
             <Image 
@@ -232,12 +232,12 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex h-screen theme-bg overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 flex flex-col relative md:ml-72">
         {/* Header */}
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="h-16 border-b theme-border flex items-center justify-between px-6 theme-bg backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <div className="md:hidden relative w-8 h-8 shrink-0">
               <Image 
@@ -255,7 +255,7 @@ function ChatPageContent() {
           <div className="flex items-center gap-2">
             <button 
               onClick={clearCurrentHistory}
-              className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all flex items-center gap-2"
+              className="p-2 theme-muted hover:theme-text theme-hover rounded-lg transition-all flex items-center gap-2"
               title="Clear History"
             >
               <Eraser size={18} />
@@ -263,7 +263,7 @@ function ChatPageContent() {
             </button>
             <button 
               onClick={deleteCurrentChat}
-              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-2"
+              className="p-2 theme-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-2"
               title="Delete Chat"
             >
               <Trash2 size={18} />
