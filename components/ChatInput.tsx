@@ -15,10 +15,10 @@ interface ChatInputProps {
   setWebSearchEnabled: (enabled: boolean) => void;
 }
 
-export default function ChatInput({ 
-  onSendMessage, 
-  disabled, 
-  attachedFile, 
+export default function ChatInput({
+  onSendMessage,
+  disabled,
+  attachedFile,
   setAttachedFile,
   webSearchEnabled,
   setWebSearchEnabled
@@ -31,6 +31,16 @@ export default function ChatInput({
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto resize textarea - but limit height so buttons stay visible
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 120);
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  }, [input]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -44,7 +54,6 @@ export default function ChatInput({
         recognition.onresult = (event: any) => {
           let interimTranscript = '';
           let finalTranscript = '';
-
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
               finalTranscript += event.results[i][0].transcript;
@@ -52,18 +61,14 @@ export default function ChatInput({
               interimTranscript += event.results[i][0].transcript;
             }
           }
-
           if (finalTranscript) {
             finalTranscriptRef.current = finalTranscriptRef.current + finalTranscript;
           }
-
-          // Show live text - final + interim only once
           setInput(finalTranscriptRef.current + interimTranscript);
         };
 
         recognition.onend = () => {
           setIsListening(false);
-          // Auto send when voice stops
           const finalText = finalTranscriptRef.current.trim();
           if (finalText) {
             onSendMessage(finalText);
@@ -94,16 +99,12 @@ export default function ChatInput({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'file' | 'camera') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAttachedFile({
-          data: reader.result as string,
-          mimeType: file.type,
-          name: file.name
-        });
+        setAttachedFile({ data: reader.result as string, mimeType: file.type, name: file.name });
         setIsMenuOpen(false);
       };
       reader.readAsDataURL(file);
@@ -118,27 +119,23 @@ export default function ChatInput({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 relative">
+    <div className="w-full max-w-4xl mx-auto px-4 pb-2 relative">
       {/* Hidden Inputs */}
-      <input type="file" ref={galleryInputRef} onChange={(e) => handleFileChange(e, 'image')} accept="image/*" className="hidden" />
-      <input type="file" ref={cameraInputRef} onChange={(e) => handleFileChange(e, 'camera')} accept="image/*" capture="environment" className="hidden" />
-      <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'file')} accept=".pdf,.doc,.docx,.txt" className="hidden" />
+      <input type="file" ref={galleryInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+      <input type="file" ref={cameraInputRef} onChange={handleFileChange} accept="image/*" capture="environment" className="hidden" />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" className="hidden" />
 
       {/* Bottom Sheet Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
             />
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed bottom-0 left-0 right-0 theme-card border-t theme-border rounded-t-[32px] z-50 p-6 pb-10 shadow-2xl"
             >
@@ -174,7 +171,9 @@ export default function ChatInput({
         )}
       </AnimatePresence>
 
-      <form onSubmit={handleSubmit} className="relative theme-card border theme-border rounded-2xl shadow-2xl overflow-hidden focus-within:border-accent/50 transition-all">
+      {/* Main input box */}
+      <form onSubmit={handleSubmit} className="theme-card border theme-border rounded-2xl shadow-2xl focus-within:border-accent/50 transition-all overflow-hidden">
+        {/* Attached file preview */}
         <AnimatePresence>
           {attachedFile && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-3 border-b theme-border bg-black/10">
@@ -197,20 +196,27 @@ export default function ChatInput({
           )}
         </AnimatePresence>
 
-        <div className="flex items-center p-2">
+        {/* Input row - flex with NO overflow:hidden so buttons always visible */}
+        <div className="flex items-end p-2 gap-1">
           {/* Plus button */}
-          <button type="button" onClick={() => setIsMenuOpen(true)} className="p-3 theme-muted hover:text-foreground theme-hover rounded-xl transition-all shrink-0 active:scale-90" disabled={disabled}>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            className="p-3 theme-muted hover:text-foreground theme-hover rounded-xl transition-all shrink-0 active:scale-90 self-end mb-0.5"
+            disabled={disabled}
+          >
             <Plus size={20} />
           </button>
 
-          {/* Web search indicator + textarea */}
-          <div className="flex-1 flex items-center relative min-w-0">
+          {/* Textarea wrapper */}
+          <div className="flex-1 flex items-end relative min-w-0">
             {webSearchEnabled && (
-              <div className="absolute left-2 z-10 flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30 shrink-0">
+              <div className="absolute left-2 bottom-2.5 z-10 flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30 shrink-0 pointer-events-none">
                 <Globe size={12} />
               </div>
             )}
             <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -221,35 +227,40 @@ export default function ChatInput({
               }}
               placeholder={isListening ? "🎤 Bol raha hun..." : "YetiAI लाई केहि सोध्नुहोस्..."}
               className={cn(
-                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none theme-text placeholder:theme-muted",
+                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none theme-text placeholder:theme-muted leading-relaxed",
+                "max-h-[120px] overflow-y-auto",
                 webSearchEnabled ? "pl-10" : "pl-2"
               )}
               rows={1}
               disabled={disabled}
+              style={{ minHeight: '44px' }}
             />
           </div>
 
-          {/* Mic button */}
-          <button
-            type="button"
-            onClick={toggleVoice}
-            disabled={disabled}
-            className={cn(
-              "p-3 rounded-xl transition-all shrink-0 active:scale-95",
-              isListening ? "bg-red-500 text-white animate-pulse" : "theme-muted  hover:bg-black/5"
-            )}
-          >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
+          {/* Right buttons - always visible, aligned to bottom */}
+          <div className="flex items-end gap-1 shrink-0 self-end mb-0.5">
+            {/* Mic button */}
+            <button
+              type="button"
+              onClick={toggleVoice}
+              disabled={disabled}
+              className={cn(
+                "p-3 rounded-xl transition-all active:scale-95",
+                isListening ? "bg-red-500 text-white animate-pulse" : "theme-muted hover:bg-black/5"
+              )}
+            >
+              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
 
-          {/* Send button */}
-          <button
-            type="submit"
-            disabled={(!input.trim() && !attachedFile) || disabled}
-            className="p-3 bg-accent text-white rounded-xl disabled:opacity-50 transition-all shrink-0 active:scale-95"
-          >
-            <Send size={20} />
-          </button>
+            {/* Send button */}
+            <button
+              type="submit"
+              disabled={(!input.trim() && !attachedFile) || disabled}
+              className="p-3 bg-accent text-white rounded-xl disabled:opacity-50 transition-all active:scale-95"
+            >
+              <Send size={20} />
+            </button>
+          </div>
         </div>
       </form>
 
@@ -258,6 +269,5 @@ export default function ChatInput({
       </p>
     </div>
   );
-        }
-
-          
+            }
+                                                       
