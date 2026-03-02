@@ -5,7 +5,7 @@ import { useRouter, useParams, usePathname } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { localChat, Chat } from '@/lib/localChat';
-import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon } from 'lucide-react';
+import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,22 @@ function SidebarContent() {
   const [user] = useAuthState(auth);
   const [chats, setChats] = useState<Chat[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    // Load saved theme
+    const saved = localStorage.getItem('yetiai-theme');
+    const dark = saved !== 'light';
+    setIsDark(dark);
+    document.documentElement.classList.toggle('light', !dark);
+  }, []);
+
+  const toggleTheme = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    document.documentElement.classList.toggle('light', !newDark);
+    localStorage.setItem('yetiai-theme', newDark ? 'dark' : 'light');
+  };
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
@@ -77,7 +93,7 @@ function SidebarContent() {
             exit={{ x: -300 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col",
+              "fixed inset-y-0 left-0 z-40 w-72 theme-sidebar border-r theme-border flex flex-col",
               !isOpen && "hidden md:flex"
             )}
           >
@@ -93,6 +109,13 @@ function SidebarContent() {
               <h1 className="text-xl font-display font-bold">
                 Yeti<span className="text-accent">AI</span>
               </h1>
+              <button
+                onClick={toggleTheme}
+                className="ml-auto p-2 rounded-lg hover:bg-white/10 transition-all"
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-blue-400" />}
+              </button>
             </div>
 
             <button
@@ -184,4 +207,5 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <SidebarContent />;
-                    }
+      }
+          
