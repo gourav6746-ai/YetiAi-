@@ -118,24 +118,36 @@ function SidebarContent() {
                 <div
                   key={chat.id}
                   onClick={() => {
+                    if (deletingId === chat.id) { deleteChat(chat.id); setDeletingId(null); return; }
                     router.push(`/chat/${chat.id}`);
                     setIsOpen(false);
                   }}
+                  onMouseDown={() => handleHoldStart(chat.id)}
+                  onMouseUp={handleHoldEnd}
+                  onTouchStart={() => handleHoldStart(chat.id)}
+                  onTouchEnd={handleHoldEnd}
                   className={cn(
-                    "group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all",
-                    chatId === chat.id 
-                      ? "bg-accent/10 text-accent border border-accent/20" 
-                      : "hover:bg-white/5 text-gray-400 hover:text-white"
+                    "group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all select-none",
+                    deletingId === chat.id
+                      ? "bg-red-500/20 border border-red-500/40"
+                      : chatId === chat.id 
+                        ? "bg-accent/10 text-accent border border-accent/20" 
+                        : "theme-hover theme-muted"
                   )}
                 >
-                  <MessageSquare size={16} className="shrink-0" />
-                  <span className="flex-1 truncate text-sm font-medium">{chat.title || 'New Chat'}</span>
-                  <button 
-                    onClick={(e) => deleteChat(e, chat.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {deletingId === chat.id ? (
+                    <Trash2 size={16} className="shrink-0 text-red-500" />
+                  ) : (
+                    <MessageSquare size={16} className="shrink-0" />
+                  )}
+                  <span className="flex-1 truncate text-sm font-medium">
+                    {deletingId === chat.id ? "Tap to delete" : (chat.title || 'New Chat')}
+                  </span>
+                  {deletingId === chat.id && (
+                    <button onClick={(e) => { e.stopPropagation(); setDeletingId(null); }} className="p-1 theme-muted">
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -193,5 +205,4 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <SidebarContent />;
-    }
-              
+              }
