@@ -129,9 +129,24 @@ function ChatPageContent() {
 
       // 4. Send message to Gemini
       let fullResponse = '';
+
+      // Helper: typewriter effect
+      const typewriterEffect = async (text: string) => {
+        // Skip typewriter for image responses
+        if (text.startsWith('YETI_IMAGE_URL:') || text.includes('YETI_WEB_IMAGE:')) {
+          setStreamingText(text);
+          return;
+        }
+        const words = text.split(' ');
+        let current = '';
+        for (let i = 0; i < words.length; i++) {
+          current += (i === 0 ? '' : ' ') + words[i];
+          setStreamingText(current);
+          await new Promise(r => setTimeout(r, 18));
+        }
+      };
       
       if (attachedFile) {
-        // Handle file request (Image or PDF)
         const base64Data = attachedFile.data.split(',')[1];
         const mimeType = attachedFile.mimeType;
         
@@ -143,15 +158,14 @@ function ChatPageContent() {
         });
 
         fullResponse = result.text || "";
-        setStreamingText(fullResponse);
+        await typewriterEffect(fullResponse);
       } else {
-        // Standard text chat
         const result = await chat.sendMessage({
           message: promptText
         });
 
         fullResponse = result.text || "";
-        setStreamingText(fullResponse);
+        await typewriterEffect(fullResponse);
       }
 
       // 5. Save bot response locally
@@ -351,4 +365,5 @@ export default function ChatPage() {
   if (!mounted) return null;
   return <ChatPageContent />;
   }
+
             
