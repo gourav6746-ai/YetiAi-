@@ -165,7 +165,7 @@ export default function ChatInput({
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="font-medium">Web Search</span>
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">Currently {webSearchEnabled ? 'ON' : 'OFF'}</span>
+                    <span className="text-[10px] theme-muted uppercase tracking-wider">Currently {webSearchEnabled ? 'ON' : 'OFF'}</span>
                   </div>
                 </button>
               </div>
@@ -181,12 +181,12 @@ export default function ChatInput({
               <div className="relative inline-block">
                 {attachedFile.mimeType.startsWith('image/') ? (
                   <div className="relative h-20 w-20">
-                    <Image src={attachedFile.data} alt="Preview" fill className="rounded-lg object-cover border border-white/10" />
+                    <Image src={attachedFile.data} alt="Preview" fill className="rounded-lg object-cover border theme-border" />
                   </div>
                 ) : (
-                  <div className="h-20 w-32 flex flex-col items-center justify-center bg-white/5 rounded-lg border border-white/10 p-2">
+                  <div className="h-20 w-32 flex flex-col items-center justify-center bg-black/5 rounded-lg border theme-border p-2">
                     <FileText size={24} className="text-accent mb-1" />
-                    <span className="text-[10px] text-gray-400 truncate w-full text-center">{attachedFile.name}</span>
+                    <span className="text-[10px] theme-muted truncate w-full text-center">{attachedFile.name}</span>
                   </div>
                 )}
                 <button type="button" onClick={() => setAttachedFile(null)} className="absolute -top-2 -right-2 bg-accent text-white rounded-full p-1 shadow-lg">
@@ -221,7 +221,7 @@ export default function ChatInput({
               }}
               placeholder={isListening ? "🎤 Bol raha hun..." : "YetiAI लाई केहि सोध्नुहोस्..."}
               className={cn(
-                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none theme-text placeholder:text-gray-400",
+                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none theme-text placeholder:theme-muted",
                 webSearchEnabled ? "pl-10" : "pl-2"
               )}
               rows={1}
@@ -236,7 +236,7 @@ export default function ChatInput({
             disabled={disabled}
             className={cn(
               "p-3 rounded-xl transition-all shrink-0 active:scale-95",
-              isListening ? "bg-red-500 text-white animate-pulse" : "text-gray-400 hover:text-white hover:bg-white/5"
+              isListening ? "bg-red-500 text-white animate-pulse" : "theme-muted  hover:bg-black/5"
             )}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
@@ -253,11 +253,11 @@ export default function ChatInput({
         </div>
       </form>
 
-      <p className="text-[10px] text-center text-gray-500 mt-2">
+      <p className="text-[10px] text-center theme-muted mt-2">
         YetiAI ले गल्ती गर्न सक्छ। महत्त्वपूर्ण जानकारी जाँच गर्नुहोस्।
       </p>
     </div>
   );
         }
 
-            
+          
