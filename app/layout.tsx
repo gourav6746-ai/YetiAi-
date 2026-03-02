@@ -13,17 +13,34 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "YetiAI - Nepal's AI Assistant",
-  description: "Nepal's first AI Assistant powered by Gemini and Firebase.",
+  title: 'YetiAI - Nepal\'s AI Assistant',
+  description: 'Nepal\'s first AI Assistant powered by Groq and Firebase.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'YetiAI',
+  },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <body suppressHydrationWarning className="theme-bg theme-text antialiased transition-colors duration-200">
+      <head>
+        <meta name="application-name" content="YetiAI" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="YetiAI" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#e11d48" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+      </head>
+      <body suppressHydrationWarning className="bg-[#0a0a0a] text-[#ededed] antialiased">
         {children}
       </body>
     </html>
