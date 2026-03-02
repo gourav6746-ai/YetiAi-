@@ -139,7 +139,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                   // imgPart format: url|photographer|query
                   const firstPipe = imgPart.indexOf('|');
                   const secondPipe = imgPart.indexOf('|', firstPipe + 1);
-                  const imgUrl = imgPart.substring(0, firstPipe);
+                  // Decode URL to handle encoded characters like &
+                  const rawImgUrl = imgPart.substring(0, firstPipe);
+                  const imgUrl = rawImgUrl.replace(/\u0026/g, '&').replace(/\u003d/g, '=');
                   const photographer = firstPipe !== -1 ? imgPart.substring(firstPipe + 1, secondPipe !== -1 ? secondPipe : undefined) : 'Pexels';
                   const query = secondPipe !== -1 ? imgPart.substring(secondPipe + 1).trim() : '';
                   if (!imgUrl) return <ReactMarkdown>{message.text}</ReactMarkdown>;
@@ -205,4 +207,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-}
+                  }
+                  
