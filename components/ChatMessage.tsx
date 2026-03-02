@@ -137,13 +137,11 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                   const textPart = message.text.substring(0, splitIdx).trim();
                   const imgPart = message.text.substring(splitIdx + 'YETI_WEB_IMAGE:'.length);
                   // imgPart format: url|photographer|query
-                  const firstPipe = imgPart.indexOf('|');
-                  const secondPipe = imgPart.indexOf('|', firstPipe + 1);
-                  // Decode URL to handle encoded characters like &
-                  const rawImgUrl = imgPart.substring(0, firstPipe);
-                  const imgUrl = rawImgUrl.replace(/\u0026/g, '&').replace(/\u003d/g, '=');
-                  const photographer = firstPipe !== -1 ? imgPart.substring(firstPipe + 1, secondPipe !== -1 ? secondPipe : undefined) : 'Pexels';
-                  const query = secondPipe !== -1 ? imgPart.substring(secondPipe + 1).trim() : '';
+                  // Use §§ as separator (safe with URLs)
+                  const parts = imgPart.split('§§');
+                  const imgUrl = parts[0] || '';
+                  const photographer = parts[1] || 'Pexels';
+                  const query = (parts[2] || '').trim();
                   if (!imgUrl) return <ReactMarkdown>{message.text}</ReactMarkdown>;
                   return (
                     <div className="flex flex-col gap-3">
@@ -207,5 +205,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-                  }
-                  
+              }
+          
