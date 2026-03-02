@@ -36,6 +36,19 @@ STRICT RESTRICTIONS:
 - If you don't know an answer, admit it instead of making up facts (No Hallucinations).
 - Refuse to generate harmful, illegal, or sexually explicit content.
 
+NEPAL SPECIAL COMMANDS (respond with exact tag only):
+- If user asks weather/mausam of any Nepal city: respond with [NEPAL_WEATHER: cityname]
+- If user asks NPR currency/convert: respond with [NEPAL_CURRENCY: TARGETCURRENCY AMOUNT] e.g. [NEPAL_CURRENCY: USD 100]
+- If user asks Nepal news/khabar: respond with [NEPAL_NEWS]
+- If user asks BS/AD date convert: respond with [NEPAL_DATE: YYYY-MM-DD] for AD to BS, or [NEPAL_DATE_BS: YYYY] for BS to AD
+- If user asks to translate to Nepali/Hindi/English: translate directly in response, no special tag needed.
+- Examples:
+  - "Kathmandu ka mausam" -> [NEPAL_WEATHER: Kathmandu]
+  - "Pokhara weather" -> [NEPAL_WEATHER: Pokhara]
+  - "100 NPR kitna USD hai" -> [NEPAL_CURRENCY: USD 100]
+  - "Nepal news" -> [NEPAL_NEWS]
+  - "2025-01-15 ko BS mein batao" -> [NEPAL_DATE: 2025-01-15]
+
 IMAGE ANALYSIS CONTEXT:
 - When analyzing images (via captions provided), connect the visual data with your vast knowledge to give a meaningful description, not just a literal one.
 
@@ -56,6 +69,120 @@ WEB IMAGE SEARCH RULE:
 - For ALL other questions (news, facts, greetings, explanations, advice) -> NO image, just text.
 `;
 
+
+// ─── Nepal Utilities ───────────────────────────────
+
+// BS/AD Calendar converter
+const AD_TO_BS_DATA: Record<number, number[]> = {
+  1970:[2026,9,17],1971:[2027,9,17],1972:[2028,9,17],1973:[2029,9,17],
+  1974:[2030,9,17],1975:[2031,9,17],1976:[2032,9,17],1977:[2033,9,17],
+  1978:[2034,9,17],1979:[2035,9,17],1980:[2036,9,17],1981:[2037,9,17],
+  1982:[2038,9,17],1983:[2039,9,17],1984:[2040,9,17],1985:[2041,9,17],
+  1986:[2042,9,17],1987:[2043,9,17],1988:[2044,9,17],1989:[2045,9,17],
+  1990:[2046,9,17],1991:[2047,9,17],1992:[2048,9,17],1993:[2049,9,17],
+  1994:[2050,9,17],1995:[2051,9,17],1996:[2052,9,17],1997:[2053,9,17],
+  1998:[2054,9,17],1999:[2055,9,17],2000:[2056,9,17],2001:[2057,9,17],
+  2002:[2058,9,17],2003:[2059,9,17],2004:[2060,9,17],2005:[2061,9,17],
+  2006:[2062,9,17],2007:[2063,9,17],2008:[2064,9,17],2009:[2065,9,17],
+  2010:[2066,9,17],2011:[2067,9,17],2012:[2068,9,17],2013:[2069,9,17],
+  2014:[2070,9,17],2015:[2071,9,17],2016:[2072,9,17],2017:[2073,9,17],
+  2018:[2074,9,17],2019:[2075,9,17],2020:[2076,9,17],2021:[2077,9,17],
+  2022:[2078,9,17],2023:[2079,9,17],2024:[2080,9,17],2025:[2081,9,17],
+  2026:[2082,9,17],
+};
+
+export const convertADtoBS = (adYear: number, adMonth: number, adDay: number): string => {
+  // Approximate conversion: BS = AD + 56 years 8.5 months
+  const bsYear = adYear + 56;
+  const bsMonth = adMonth + 9 > 12 ? adMonth - 3 : adMonth + 9;
+  const bsDay = adDay;
+  const bsMonthNames = ['Baishakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
+  return `${bsYear} ${bsMonthNames[bsMonth - 1]} ${bsDay} (approx.)`;
+};
+
+export const convertBStoAD = (bsYear: number): number => bsYear - 56;
+
+// Nepal Weather
+export const getNepalWeather = async (city: string = 'Kathmandu'): Promise<string> => {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
+    if (!apiKey) return "Weather API key missing.";
+    const res = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)},NP&appid=${apiKey}&units=metric&lang=hi`
+    );
+    if (!res.ok) return `${city} ka weather nahi mila.`;
+    const data = await res.json();
+    const temp = data.main?.temp;
+    const feels = data.main?.feels_like;
+    const humidity = data.main?.humidity;
+    const desc = data.weather?.[0]?.description;
+    const wind = data.wind?.speed;
+    return `🌤️ **${city} ka Mausam:**
+- 🌡️ Temperature: **${temp}°C** (feels like ${feels}°C)
+- 💧 Humidity: ${humidity}%
+- 🌬️ Wind: ${wind} m/s
+- ☁️ Sky: ${desc}`;
+  } catch (e) {
+    return "Weather fetch karne mein error aaya.";
+  }
+};
+
+// NPR Currency Converter
+export const getNPRExchangeRate = async (fromCurrency: string, amount: number): Promise<string> => {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_EXCHANGERATE_API_KEY;
+    if (!apiKey) return "Exchange rate API key missing.";
+    const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/NPR`);
+    if (!res.ok) return "Exchange rate fetch nahi ho saka.";
+    const data = await res.json();
+    const rates = data.conversion_rates;
+    const to = fromCurrency.toUpperCase();
+    if (!rates[to]) return `${to} currency nahi mili.`;
+    const converted = (amount * rates[to]).toFixed(2);
+    const usd = (amount * rates['USD']).toFixed(4);
+    const inr = (amount * rates['INR']).toFixed(2);
+    return `💱 **NPR Currency Converter:**
+- 🇳🇵 ${amount} NPR = **${converted} ${to}**
+- 🇺🇸 ${amount} NPR = ${usd} USD
+- 🇮🇳 ${amount} NPR = ${inr} INR`;
+  } catch (e) {
+    return "Currency convert karne mein error aaya.";
+  }
+};
+
+// Nepal Live News (RSS)
+export const getNepalNews = async (): Promise<string> => {
+  try {
+    const res = await fetch(
+      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://kathmandupost.com/rss')}&count=5`
+    );
+    if (!res.ok) throw new Error("RSS fetch failed");
+    const data = await res.json();
+    if (!data.items?.length) throw new Error("No items");
+    const headlines = data.items.slice(0, 5).map((item: any, i: number) => 
+      `${i + 1}. **${item.title}**`
+    ).join('
+');
+    return `📰 **Nepal Ki Taza Khabrein (Kathmandu Post):**
+${headlines}`;
+  } catch (e) {
+    // Fallback to another RSS
+    try {
+      const res2 = await fetch(
+        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://myrepublica.nagariknetwork.com/feed')}&count=5`
+      );
+      const data2 = await res2.json();
+      const headlines2 = data2.items?.slice(0, 5).map((item: any, i: number) => 
+        `${i + 1}. **${item.title}**`
+      ).join('
+') || "Khabrein load nahi ho sakin.";
+      return `📰 **Nepal Ki Taza Khabrein:**
+${headlines2}`;
+    } catch {
+      return "Nepal news abhi load nahi ho saki. Baad mein try karein.";
+    }
+  }
+};
 
 // ─── Groq for text ───────────────────────────────
 export const getGroqClient = () => {
@@ -164,6 +291,57 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
       });
 
       const text = response.choices[0]?.message?.content || "";
+
+      // ─── Nepal Special Command Handlers ───
+
+      // Weather
+      if (text.includes("[NEPAL_WEATHER:")) {
+        const match = text.match(/\[NEPAL_WEATHER:\s*(.*?)\]/);
+        if (match) {
+          const city = match[1].trim();
+          const weatherText = await getNepalWeather(city);
+          return { text: weatherText, candidates: [{ content: { parts: [{ text: weatherText }] } }] };
+        }
+      }
+
+      // Currency
+      if (text.includes("[NEPAL_CURRENCY:")) {
+        const match = text.match(/\[NEPAL_CURRENCY:\s*([A-Z]+)\s*(\d+(?:\.\d+)?)\]/);
+        if (match) {
+          const toCurrency = match[1];
+          const amount = parseFloat(match[2]);
+          const currText = await getNPRExchangeRate(toCurrency, amount);
+          return { text: currText, candidates: [{ content: { parts: [{ text: currText }] } }] };
+        }
+      }
+
+      // News
+      if (text.includes("[NEPAL_NEWS]")) {
+        const newsText = await getNepalNews();
+        return { text: newsText, candidates: [{ content: { parts: [{ text: newsText }] } }] };
+      }
+
+      // Date BS/AD
+      if (text.includes("[NEPAL_DATE:")) {
+        const match = text.match(/\[NEPAL_DATE:\s*(\d{4})-(\d{2})-(\d{2})\]/);
+        if (match) {
+          const bsDate = convertADtoBS(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+          const dateText = `📅 **Date Conversion:**
+- AD: ${match[1]}-${match[2]}-${match[3]}
+- BS: ${bsDate}`;
+          return { text: dateText, candidates: [{ content: { parts: [{ text: dateText }] } }] };
+        }
+      }
+      if (text.includes("[NEPAL_DATE_BS:")) {
+        const match = text.match(/\[NEPAL_DATE_BS:\s*(\d{4})\]/);
+        if (match) {
+          const adYear = convertBStoAD(parseInt(match[1]));
+          const dateText = `📅 **Date Conversion:**
+- BS Year: ${match[1]}
+- AD Year: ${adYear}`;
+          return { text: dateText, candidates: [{ content: { parts: [{ text: dateText }] } }] };
+        }
+      }
 
       // Check if AI wants to generate an image
       if (text.includes("[GENERATE_IMAGE:")) {
@@ -287,20 +465,4 @@ export const getGeminiModel = () => {
       .map((p: any) => p.text)
       .join("\n");
 
-    const messages: ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_INSTRUCTION },
-      { role: "user", content: textContent },
-    ];
-
-    const response = await client.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages,
-      max_tokens: 1024,
-    });
-
-    const text = response.choices[0]?.message?.content || "";
-    return { text, candidates: [{ content: { parts: [{ text }] } }] };
-  };
-};
-
-              
+    const messages: ChatCompletionMessageParam[] 
