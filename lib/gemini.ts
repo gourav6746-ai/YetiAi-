@@ -106,10 +106,8 @@ export const getNPRExchangeRate = async (fromCurrency: string, amount: number): 
     const rates = d.conversion_rates;
     const to = fromCurrency.toUpperCase();
     if (!rates[to]) return to + " currency nahi mili.";
-    return ["💱 **NPR Currency Converter:**",
-      "- 🇳🇵 " + amount + " NPR = **" + (amount * rates[to]).toFixed(2) + " " + to + "**",
-      "- 🇺🇸 " + amount + " NPR = " + (amount * rates["USD"]).toFixed(4) + " USD",
-      "- 🇮🇳 " + amount + " NPR = " + (amount * rates["INR"]).toFixed(2) + " INR"].join("\n");
+    const converted = (amount * rates[to]).toFixed(4);
+    return "💱 **" + amount + " NPR = " + converted + " " + to + "**";
   } catch (e) {
     return "Currency convert karne mein error aaya.";
   }
@@ -302,4 +300,4 @@ export const getGeminiModel = () => {
     return { text, candidates: [{ content: { parts: [{ text }] } }] };
   };
 };
-                                     
+      
