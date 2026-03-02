@@ -109,7 +109,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             )}
             <div className="markdown-body">
               {/* --- NAYA CODE SIRF YAHAN ADD KIYA HAI --- */}
-              {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
+              {isBot && message.text.includes('[SEARCH_IMAGE:') ? (
+                // SEARCH_IMAGE tag not yet processed — strip it and show text only
+                <ReactMarkdown>{message.text.replace(/\[SEARCH_IMAGE:.*?\]/g, '').trim()}</ReactMarkdown>
+              ) : isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                 <div className="flex flex-col gap-3 mt-1">
                   <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -205,5 +208,4 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-              }
-          
+          }
