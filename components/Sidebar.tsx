@@ -1,11 +1,12 @@
-import Image from 'next/image';
+'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { localChat, Chat } from '@/lib/localChat';
-import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon } from 'lucide-react';
+import { Plus, MessageSquare, LogOut, Trash2, Menu, X, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -15,29 +16,40 @@ function SidebarContent() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(true);
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
-  const pathname = usePathname();
   const params = useParams();
   const chatId = params?.id as string;
 
   useEffect(() => {
-    if (!user) return;
+    const saved = localStorage.getItem('yetiai-theme');
+    const dark = saved !== 'light';
+    setIsDark(dark);
+    document.documentElement.classList.toggle('light', !dark);
+  }, []);
 
+  useEffect(() => {
+    if (!user) return;
     const loadChats = () => {
       const fetchedChats = localChat.getChats(user.uid);
       setChats(fetchedChats);
     };
-
     loadChats();
     window.addEventListener('storage', loadChats);
     window.addEventListener('chatUpdated', loadChats);
-    
     return () => {
       window.removeEventListener('storage', loadChats);
       window.removeEventListener('chatUpdated', loadChats);
     };
   }, [user]);
+
+  const toggleTheme = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    document.documentElement.classList.toggle('light', !newDark);
+    localStorage.setItem('yetiai-theme', newDark ? 'dark' : 'light');
+  };
 
   const createNewChat = () => {
     if (!user) return;
@@ -71,9 +83,9 @@ function SidebarContent() {
   return (
     <>
       {/* Mobile Toggle */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 p-2 bg-[#151515] rounded-lg border border-white/10 md:hidden"
+        className="fixed top-4 left-4 z-50 p-2 theme-card rounded-lg border theme-border md:hidden"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -86,15 +98,16 @@ function SidebarContent() {
             exit={{ x: -300 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col",
+              "fixed inset-y-0 left-0 z-40 w-72 theme-sidebar border-r theme-border flex flex-col",
               !isOpen && "hidden md:flex"
             )}
           >
+            {/* Header */}
             <div className="p-4 flex items-center gap-3 mb-4">
               <div className="relative w-8 h-8 shrink-0">
-                <Image 
-                  src="/logo.png" 
-                  alt="YetiAI Logo" 
+                <Image
+                  src="/logo.png"
+                  alt="YetiAI Logo"
                   fill
                   className="object-contain dark-logo"
                 />
@@ -102,23 +115,36 @@ function SidebarContent() {
               <h1 className="text-xl font-display font-bold">
                 Yeti<span className="text-accent">AI</span>
               </h1>
+              <button
+                onClick={toggleTheme}
+                className="ml-auto p-2 rounded-lg theme-hover transition-all"
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-blue-400" />}
+              </button>
             </div>
 
+            {/* New Chat Button */}
             <button
               onClick={createNewChat}
-              className="mx-4 mb-6 flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent py-3 px-4 rounded-xl transition-all group"
+              className="mx-4 mb-6 flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent py-3 px-4 rounded-xl transition-all"
             >
-              <Plus size={18} className="group-hover:text-accent transition-colors" />
+              <Plus size={18} />
               <span className="font-medium">New Chat</span>
             </button>
 
+            {/* Chat List */}
             <div className="flex-1 overflow-y-auto px-2 space-y-1">
-              <p className="px-4 text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2">Recent Chats</p>
+              <p className="px-4 text-[10px] uppercase tracking-widest theme-muted font-bold mb-2">Recent Chats</p>
               {chats.map((chat) => (
                 <div
                   key={chat.id}
                   onClick={() => {
-                    if (deletingId === chat.id) { deleteChat(chat.id); setDeletingId(null); return; }
+                    if (deletingId === chat.id) {
+                      deleteChat(chat.id);
+                      setDeletingId(null);
+                      return;
+                    }
                     router.push(`/chat/${chat.id}`);
                     setIsOpen(false);
                   }}
@@ -127,24 +153,26 @@ function SidebarContent() {
                   onTouchStart={() => handleHoldStart(chat.id)}
                   onTouchEnd={handleHoldEnd}
                   className={cn(
-                    "group flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all select-none",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all select-none",
                     deletingId === chat.id
-                      ? "bg-red-500/20 border border-red-500/40"
-                      : chatId === chat.id 
-                        ? "bg-accent/10 text-accent border border-accent/20" 
+                      ? "bg-red-500/20 border border-red-500/40 text-red-500"
+                      : chatId === chat.id
+                        ? "bg-accent/10 text-accent border border-accent/20"
                         : "theme-hover theme-muted"
                   )}
                 >
-                  {deletingId === chat.id ? (
-                    <Trash2 size={16} className="shrink-0 text-red-500" />
-                  ) : (
-                    <MessageSquare size={16} className="shrink-0" />
-                  )}
+                  {deletingId === chat.id
+                    ? <Trash2 size={16} className="shrink-0" />
+                    : <MessageSquare size={16} className="shrink-0" />
+                  }
                   <span className="flex-1 truncate text-sm font-medium">
                     {deletingId === chat.id ? "Tap to delete" : (chat.title || 'New Chat')}
                   </span>
                   {deletingId === chat.id && (
-                    <button onClick={(e) => { e.stopPropagation(); setDeletingId(null); }} className="p-1 theme-muted">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeletingId(null); }}
+                      className="p-1 theme-muted"
+                    >
                       <X size={14} />
                     </button>
                   )}
@@ -152,8 +180,9 @@ function SidebarContent() {
               ))}
             </div>
 
-            <div className="p-4 border-t border-white/5 mt-auto">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 mb-3">
+            {/* User Profile */}
+            <div className="p-4 border-t theme-border mt-auto">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-black/5 mb-3">
                 <div className="relative w-8 h-8 shrink-0">
                   {user?.photoURL ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -162,23 +191,23 @@ function SidebarContent() {
                       alt="Avatar"
                       width={32}
                       height={32}
-                      className="rounded-full border border-white/10 object-cover w-8 h-8"
+                      className="rounded-full border theme-border object-cover w-8 h-8"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-sm font-bold text-red-400">
+                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-sm font-bold text-accent">
                       {user?.displayName?.[0] || 'U'}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 truncate">
-                  <p className="text-sm font-medium truncate">{user?.displayName}</p>
-                  <p className="text-[10px] text-gray-500 truncate">{user?.email}</p>
+                  <p className="text-sm font-medium truncate theme-text">{user?.displayName}</p>
+                  <p className="text-[10px] theme-muted truncate">{user?.email}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm theme-muted theme-hover rounded-lg transition-all"
               >
                 <LogOut size={16} />
                 Logout
@@ -188,9 +217,9 @@ function SidebarContent() {
         )}
       </AnimatePresence>
 
-      {/* Overlay for mobile */}
+      {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsOpen(false)}
         />
@@ -201,8 +230,8 @@ function SidebarContent() {
 
 export default function Sidebar() {
   const [mounted, setMounted] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <SidebarContent />;
-              }
+      }
+                      
