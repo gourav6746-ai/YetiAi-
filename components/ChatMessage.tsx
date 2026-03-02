@@ -143,4 +143,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-              }
+          }
+                    
