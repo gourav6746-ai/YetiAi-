@@ -1,11 +1,11 @@
 import Image from 'next/image';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, usePathname } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { localChat, Chat } from '@/lib/localChat';
-import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon, Sun, Moon } from 'lucide-react';
+import { Mountain, Plus, MessageSquare, LogOut, Trash2, Menu, X, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -14,22 +14,8 @@ function SidebarContent() {
   const [user] = useAuthState(auth);
   const [chats, setChats] = useState<Chat[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    // Load saved theme
-    const saved = localStorage.getItem('yetiai-theme');
-    const dark = saved !== 'light';
-    setIsDark(dark);
-    document.documentElement.classList.toggle('light', !dark);
-  }, []);
-
-  const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    document.documentElement.classList.toggle('light', !newDark);
-    localStorage.setItem('yetiai-theme', newDark ? 'dark' : 'light');
-  };
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
@@ -61,13 +47,20 @@ function SidebarContent() {
     setIsOpen(false);
   };
 
-  const deleteChat = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const deleteChat = (id: string) => {
     localChat.deleteChat(id);
     window.dispatchEvent(new Event('chatUpdated'));
-    if (chatId === id) {
-      router.push('/');
-    }
+    if (chatId === id) router.push('/');
+  };
+
+  const handleHoldStart = (id: string) => {
+    holdTimer.current = setTimeout(() => {
+      setDeletingId(id);
+    }, 600);
+  };
+
+  const handleHoldEnd = () => {
+    if (holdTimer.current) clearTimeout(holdTimer.current);
   };
 
   const handleLogout = () => {
@@ -93,7 +86,7 @@ function SidebarContent() {
             exit={{ x: -300 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "fixed inset-y-0 left-0 z-40 w-72 theme-sidebar border-r theme-border flex flex-col",
+              "fixed inset-y-0 left-0 z-40 w-72 bg-[#111111] border-r border-white/5 flex flex-col",
               !isOpen && "hidden md:flex"
             )}
           >
@@ -103,24 +96,17 @@ function SidebarContent() {
                   src="/logo.png" 
                   alt="YetiAI Logo" 
                   fill
-                  className="object-contain"
+                  className="object-contain dark-logo"
                 />
               </div>
               <h1 className="text-xl font-display font-bold">
                 Yeti<span className="text-accent">AI</span>
               </h1>
-              <button
-                onClick={toggleTheme}
-                className="ml-auto p-2 rounded-lg hover:bg-white/10 transition-all"
-                title={isDark ? 'Light mode' : 'Dark mode'}
-              >
-                {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-blue-400" />}
-              </button>
             </div>
 
             <button
               onClick={createNewChat}
-              className="mx-4 mb-6 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 py-3 px-4 rounded-xl transition-all group"
+              className="mx-4 mb-6 flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent py-3 px-4 rounded-xl transition-all group"
             >
               <Plus size={18} className="group-hover:text-accent transition-colors" />
               <span className="font-medium">New Chat</span>
@@ -207,5 +193,5 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return <SidebarContent />;
-      }
-          
+    }
+              
