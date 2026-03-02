@@ -46,16 +46,23 @@ IMAGE GENERATION RULE:
 - Do not add any other text when generating an image.
 
 WEB IMAGE SEARCH RULE:
-- For ANY topic or question where showing a real image would be helpful (animals, places, food, people, objects, nature, sports, etc.), ALWAYS include [SEARCH_IMAGE: query] at the END of your response.
-- If user explicitly asks to show/dikhao/search an image, put [SEARCH_IMAGE: query] as the ONLY response.
-- If user asks about a topic (like "cat ke baare mein batao", "Eiffel Tower kya hai", "car ki jankari do"), give your normal text answer FIRST, then add [SEARCH_IMAGE: query] at the very end.
-- Examples:
-  - "cat ke baare mein batao" -> full text answer + [SEARCH_IMAGE: cat]
-  - "Everest kya hai" -> full text answer + [SEARCH_IMAGE: Mount Everest Nepal]
-  - "car dikhao" -> [SEARCH_IMAGE: car]
-  - "momo recipe" -> full text answer + [SEARCH_IMAGE: Nepali momo dish]
-  - "Nepal ke baare mein" -> full text answer + [SEARCH_IMAGE: Nepal landscape]
-- Do NOT add [SEARCH_IMAGE] for math, coding, general knowledge without visual context, or personal questions.
+- Your goal is to behave like ChatGPT — show images smartly when they add value to the answer.
+- Add [SEARCH_IMAGE: query] at the END of your response ONLY when the topic is visual and specific (a real object, animal, place, food, person, vehicle, landmark, etc.).
+- DO add image for:
+  - Specific animals: "cat kya hai", "lion ke baare mein batao" -> add [SEARCH_IMAGE: cat], [SEARCH_IMAGE: lion]
+  - Specific places/landmarks: "Eiffel Tower", "Nepal", "Paris" -> add [SEARCH_IMAGE: ...]
+  - Specific vehicles: "BMW", "Ferrari", "helicopter" -> add [SEARCH_IMAGE: ...]
+  - Specific foods: "momo", "pizza", "biryani" -> add [SEARCH_IMAGE: ...]
+  - Specific people/celebrities (public): "Elon Musk", "Virat Kohli" -> add [SEARCH_IMAGE: ...]
+  - Nature/space topics: "volcano", "galaxy", "ocean" -> add [SEARCH_IMAGE: ...]
+  - Technology products: "iPhone", "laptop", "drone" -> add [SEARCH_IMAGE: ...]
+- DO NOT add image for:
+  - Greetings or personal questions: "kya kar rahe ho", "how are you", "namaste"
+  - Abstract topics: "love kya hai", "success", "motivation"
+  - Math, coding, logic problems
+  - Opinions or advice: "kya karna chahiye", "help me"
+  - Follow-up questions in conversation: "aur batao", "explain karo"
+- Format: Give full text answer first, then on a new line add [SEARCH_IMAGE: specific English query].
 `;
 
 
@@ -296,4 +303,4 @@ export const getGeminiModel = () => {
   };
 };
 
-        
+      
