@@ -1,118 +1,32 @@
-@import "tailwindcss";
+import type { Metadata } from 'next';
+import { Inter, Space_Grotesk } from 'next/font/google';
+import './globals.css';
 
-@theme {
-  --color-accent: #DC143C;
-  --color-accent-hover: #B21031;
-}
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
 
-:root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+});
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-}
+export const metadata: Metadata = {
+  title: "YetiAI - Nepal's AI Assistant",
+  description: "Nepal's first AI Assistant powered by Gemini and Firebase.",
+  icons: {
+    icon: '/favicon.ico',
+  },
+};
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #444;
-}
-
-.markdown-body {
-  line-height: 1.6;
-}
-
-.markdown-body p {
-  margin-bottom: 1rem;
-}
-
-.markdown-body code {
-  background: #2d2d2d;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-}
-
-.markdown-body pre {
-  background: #1e1e1e;
-  padding: 1rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-.markdown-body pre code {
-  background: transparent;
-  padding: 0;
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3 {
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  margin-top: 1rem;
-}
-
-.markdown-body h1 { font-size: 1.5rem; }
-.markdown-body h2 { font-size: 1.25rem; }
-.markdown-body h3 { font-size: 1.1rem; }
-
-.markdown-body strong {
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.markdown-body em {
-  font-style: italic;
-  color: #d1d5db;
-}
-
-.markdown-body ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-body ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-body li {
-  margin-bottom: 0.4rem;
-}
-
-.markdown-body a {
-  color: #DC143C;
-  text-decoration: underline;
-}
-
-.markdown-body blockquote {
-  border-left: 3px solid #DC143C;
-  padding-left: 1rem;
-  color: #9ca3af;
-  margin-bottom: 1rem;
-}
-
-.markdown-body hr {
-  border-color: #374151;
-  margin: 1rem 0;
-}
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body suppressHydrationWarning className="theme-bg theme-text antialiased transition-colors duration-200">
+        {children}
+      </body>
+    </html>
+  );
+  }
+         
