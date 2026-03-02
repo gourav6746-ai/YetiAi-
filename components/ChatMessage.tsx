@@ -71,7 +71,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                     <span className="text-xs font-medium theme-text truncate max-w-[200px]">
                       {message.file.name || 'Document.pdf'}
                     </span>
-                    <span className="text-[10px] text-gray-500 uppercase">PDF Document</span>
+                    <span className="text-[10px] theme-muted uppercase">PDF Document</span>
                   </div>
                 </div>
               )}
@@ -111,7 +111,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                        </a>
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-500 italic">YetiAI ne yeh image aapke liye banayi hai.</p>
+                  <p className="text-[10px] theme-muted italic">YetiAI ne yeh image aapke liye banayi hai.</p>
                 </div>
               ) : (
                 <ReactMarkdown>{message.text}</ReactMarkdown>
@@ -122,7 +122,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
           {isBot && message.sources && message.sources.length > 0 && (
             <div className="mt-2 flex flex-col gap-2 w-full">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Sources:</p>
+              <p className="text-[10px] font-bold theme-muted uppercase tracking-widest px-1">Sources:</p>
               <div className="flex flex-wrap gap-2">
                 {message.sources.map((source, i) => (
                   <a 
@@ -143,5 +143,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-          }
+                    }
                     
