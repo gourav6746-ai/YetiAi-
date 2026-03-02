@@ -13,8 +13,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'YetiAI - Nepal\'s AI Assistant',
-  description: 'Nepal\'s first AI Assistant powered by Gemini and Firebase.',
+  title: "YetiAI - Nepal's AI Assistant",
+  description: "Nepal's first AI Assistant powered by Gemini and Firebase.",
   icons: {
     icon: '/favicon.ico',
   },
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} dark`}>
-      <body suppressHydrationWarning className="bg-[#0a0a0a] text-[#ededed] antialiased">
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body suppressHydrationWarning className="theme-bg theme-text antialiased transition-colors duration-200">
         {children}
       </body>
     </html>
