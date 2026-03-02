@@ -238,10 +238,10 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
                 console.log("Pexels photos found:", pexelsData.photos?.length);
                 // Best photo — highest resolution
                 const bestPhoto = pexelsData.photos?.[0];
-                // Decode URL to handle & encoded characters
-                const rawUrl = bestPhoto?.src?.large2x || bestPhoto?.src?.large || bestPhoto?.src?.original || "";
-                imageUrl = rawUrl ? decodeURIComponent(rawUrl) : "";
+                // Use URL as-is — do NOT decode, Pexels URLs work directly
+                imageUrl = bestPhoto?.src?.large2x || bestPhoto?.src?.large || bestPhoto?.src?.original || "";
                 photographer = bestPhoto?.photographer || "Pexels";
+                console.log("Pexels imageUrl:", imageUrl.substring(0, 80));
               }
             }
 
@@ -263,7 +263,8 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
             }
 
             if (imageUrl) {
-              const imageTag = `YETI_WEB_IMAGE:${imageUrl}|${photographer}|${searchQuery}`;
+              // Use §§ as separator to avoid conflicts with URL characters
+              const imageTag = `YETI_WEB_IMAGE:${imageUrl}§§${photographer}§§${searchQuery}`;
               const finalResponse = cleanText ? `${cleanText}
 
 ${imageTag}` : imageTag;
@@ -311,4 +312,4 @@ export const getGeminiModel = () => {
   };
 };
 
-                                                  
+                                                                   
