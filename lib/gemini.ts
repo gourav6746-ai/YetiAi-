@@ -46,23 +46,14 @@ IMAGE GENERATION RULE:
 - Do not add any other text when generating an image.
 
 WEB IMAGE SEARCH RULE:
-- Your goal is to behave like ChatGPT — show images smartly when they add value to the answer.
-- Add [SEARCH_IMAGE: query] at the END of your response ONLY when the topic is visual and specific (a real object, animal, place, food, person, vehicle, landmark, etc.).
-- DO add image for:
-  - Specific animals: "cat kya hai", "lion ke baare mein batao" -> add [SEARCH_IMAGE: cat], [SEARCH_IMAGE: lion]
-  - Specific places/landmarks: "Eiffel Tower", "Nepal", "Paris" -> add [SEARCH_IMAGE: ...]
-  - Specific vehicles: "BMW", "Ferrari", "helicopter" -> add [SEARCH_IMAGE: ...]
-  - Specific foods: "momo", "pizza", "biryani" -> add [SEARCH_IMAGE: ...]
-  - Specific people/celebrities (public): "Elon Musk", "Virat Kohli" -> add [SEARCH_IMAGE: ...]
-  - Nature/space topics: "volcano", "galaxy", "ocean" -> add [SEARCH_IMAGE: ...]
-  - Technology products: "iPhone", "laptop", "drone" -> add [SEARCH_IMAGE: ...]
-- DO NOT add image for:
-  - Greetings or personal questions: "kya kar rahe ho", "how are you", "namaste"
-  - Abstract topics: "love kya hai", "success", "motivation"
-  - Math, coding, logic problems
-  - Opinions or advice: "kya karna chahiye", "help me"
-  - Follow-up questions in conversation: "aur batao", "explain karo"
-- Format: Give full text answer first, then on a new line add [SEARCH_IMAGE: specific English query].
+- ONLY add [SEARCH_IMAGE: query] when user EXPLICITLY uses words like: "dikhao", "photo", "image", "show", "dekho", "picture", "dekhna hai".
+- Examples where you MUST add image:
+  - "car dikhao" -> [SEARCH_IMAGE: car]
+  - "cat ki photo" -> [SEARCH_IMAGE: cat]
+  - "BMW ka photo dikhao" -> text + [SEARCH_IMAGE: BMW car]
+  - "Everest dikhao" -> [SEARCH_IMAGE: Mount Everest]
+- NEVER add [SEARCH_IMAGE] on your own — ONLY when user explicitly asks to see something.
+- For ALL other questions (news, facts, greetings, explanations, advice) -> NO image, just text.
 `;
 
 
@@ -312,4 +303,4 @@ export const getGeminiModel = () => {
   };
 };
 
-  
+              
