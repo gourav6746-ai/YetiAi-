@@ -216,7 +216,7 @@ function ChatPageContent() {
 
   if (loadingAuth || !chatData) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
+      <div className="flex items-center justify-center min-h-screen theme-bg">
         <div className="animate-pulse text-accent">
           <div className="relative w-12 h-12">
             <Image 
@@ -232,12 +232,12 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex h-screen theme-bg overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 flex flex-col relative md:ml-72">
         {/* Header */}
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="h-16 border-b theme-border flex items-center justify-between px-6 theme-bg/80 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <div className="md:hidden relative w-8 h-8 shrink-0">
               <Image 
@@ -328,7 +328,7 @@ function ChatPageContent() {
                         />
                       </div>
                     </div>
-                    <div className="bg-[#1a1a1a] px-4 py-3 rounded-2xl border border-white/5">
+                    <div className="theme-card px-4 py-3 rounded-2xl border theme-border">
                       <div className="flex gap-1">
                         <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -366,4 +366,4 @@ export default function ChatPage() {
   return <ChatPageContent />;
   }
 
-            
+      
