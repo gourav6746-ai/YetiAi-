@@ -104,11 +104,24 @@ function ChatPageContent() {
       const systemContext = `[Current Nepal Time: ${nepalTime}]`;
       const chat = getGeminiChat(history, systemContext);
 
-      // 3. Handle Web Search if enabled
+      // 3. Handle Web Search - manual OR auto-detect live queries
       let searchResults: any[] = [];
       let promptText = text;
 
-      if (webSearchEnabled && !attachedFile) {
+      // Auto-detect: kya yeh real-time data wala question hai?
+      const liveKeywords = [
+        'price', 'rate', 'cost', 'kitna', 'abhi', 'current', 'aaj', 'today',
+        'live', 'stock', 'crypto', 'bitcoin', 'btc', 'eth', 'gold', 'silver',
+        'petrol', 'diesel', 'dollar', 'usd', 'eur', 'score', 'result',
+        'weather', 'mausam', 'news', 'khabar', 'match', 'election'
+      ];
+      const lowerText = text.toLowerCase();
+      const needsAutoSearch = !attachedFile && !webSearchEnabled && 
+        liveKeywords.some(kw => lowerText.includes(kw));
+
+      const shouldSearch = (webSearchEnabled || needsAutoSearch) && !attachedFile;
+
+      if (shouldSearch) {
         try {
           const searchRes = await fetch('/api/search', {
             method: 'POST',
@@ -175,7 +188,7 @@ function ChatPageContent() {
         timestamp: Date.now() 
       };
 
-      if (webSearchEnabled && searchResults.length > 0) {
+      if (shouldSearch && searchResults.length > 0) {
         botMessage.webSearch = true;
         botMessage.sources = searchResults.slice(0, 3).map(r => ({ title: r.title, url: r.url }));
       }
@@ -366,4 +379,4 @@ export default function ChatPage() {
   return <ChatPageContent />;
   }
 
-        
+                                                                                                                           
