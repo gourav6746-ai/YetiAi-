@@ -226,24 +226,32 @@ export const getGeminiChat = (history: any[] = [], systemContext?: string) => {
           try {
             // PRIMARY: Pexels
             const pexelsKey = process.env.NEXT_PUBLIC_PEXELS_API_KEY;
+            console.log("Pexels key exists:", !!pexelsKey);
             if (pexelsKey) {
               const pexelsRes = await fetch(
-                `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
+                `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=3&orientation=landscape`,
                 { headers: { Authorization: pexelsKey } }
               );
+              console.log("Pexels response status:", pexelsRes.status);
               if (pexelsRes.ok) {
                 const pexelsData = await pexelsRes.json();
-                imageUrl = pexelsData.photos?.[0]?.src?.large || "";
-                photographer = pexelsData.photos?.[0]?.photographer || "Pexels";
+                console.log("Pexels photos found:", pexelsData.photos?.length);
+                // Best photo — highest resolution
+                const bestPhoto = pexelsData.photos?.[0];
+                // Decode URL to handle & encoded characters
+                const rawUrl = bestPhoto?.src?.large2x || bestPhoto?.src?.large || bestPhoto?.src?.original || "";
+                imageUrl = rawUrl ? decodeURIComponent(rawUrl) : "";
+                photographer = bestPhoto?.photographer || "Pexels";
               }
             }
 
             // FALLBACK: Unsplash (agar Pexels se nahi mila)
             if (!imageUrl) {
+              console.log("Pexels failed, trying Unsplash...");
               const unsplashKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
               if (unsplashKey) {
                 const unsplashRes = await fetch(
-                  `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=landscape`,
+                  `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=3&orientation=landscape`,
                   { headers: { Authorization: `Client-ID ${unsplashKey}` } }
                 );
                 if (unsplashRes.ok) {
@@ -303,4 +311,4 @@ export const getGeminiModel = () => {
   };
 };
 
-      
+                                                  
