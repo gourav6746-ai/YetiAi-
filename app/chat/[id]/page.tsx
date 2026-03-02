@@ -216,7 +216,7 @@ function ChatPageContent() {
 
   if (loadingAuth || !chatData) {
     return (
-      <div className="flex items-center justify-center min-h-screen theme-bg">
+      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
         <div className="animate-pulse text-accent">
           <div className="relative w-12 h-12">
             <Image 
@@ -232,12 +232,12 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="flex h-screen theme-bg overflow-hidden">
+    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 flex flex-col relative md:ml-72">
         {/* Header */}
-        <header className="h-16 border-b theme-border flex items-center justify-between px-6 theme-bg/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <div className="md:hidden relative w-8 h-8 shrink-0">
               <Image 
@@ -296,7 +296,7 @@ function ChatPageContent() {
                     </div>
                   </motion.div>
                   <h3 className="text-2xl font-display font-bold mb-2">Namaste! 🏔️ Main YetiAI hun —</h3>
-                  <p className="text-gray-400 max-w-md text-xl">
+                  <p className="theme-muted max-w-md text-xl">
                     aapki kya madad kar sakta hun?
                   </p>
                 </div>
@@ -343,7 +343,7 @@ function ChatPageContent() {
         </div>
 
         {/* Input */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent pt-10 pb-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent pt-10 pb-4">
           <ChatInput 
             onSendMessage={handleSendMessage} 
             disabled={isLoading} 
@@ -366,4 +366,4 @@ export default function ChatPage() {
   return <ChatPageContent />;
   }
 
-      
+        
