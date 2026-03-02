@@ -2,7 +2,7 @@
 
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
-import { User, Globe, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
+import { User, Globe, ExternalLink, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +34,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       )}>
         <div className={cn(
           "shrink-0 flex items-center justify-center",
-          isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border bg-white/10 border-white/10"
+          isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"
         )}>
           {isBot ? (
             <Image
@@ -54,41 +54,24 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           isBot ? "items-start" : "items-end"
         )}>
           {message.file && (
-            <div className="rounded-xl overflow-hidden border border-white/10 mb-2 max-w-sm">
+            <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
-                message.file.data ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={message.file.data}
-                    alt="Uploaded"
-                    className="w-full object-cover max-h-64"
-                  />
-                ) : (
-                  // Image data stripped from storage - show placeholder
-                  <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="bg-accent/20 p-2 rounded-lg">
-                      <ImageIcon size={20} className="text-accent" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-medium text-gray-200">{message.file.name || 'Image'}</span>
-                      <span className="text-[10px] text-gray-500">Image (session mein hi dikhti hai)</span>
-                    </div>
-                  </div>
-                )
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={message.file.data}
+                  alt="Uploaded"
+                  className="w-full object-cover max-h-64"
+                />
               ) : (
-                <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="flex items-center gap-3 p-4 theme-hover rounded-xl border theme-border">
                   <div className="bg-accent/20 p-2 rounded-lg">
                     <FileText size={20} className="text-accent" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-medium text-gray-200 truncate max-w-[200px]">
+                    <span className="text-xs font-medium theme-text truncate max-w-[200px]">
                       {message.file.name || 'Document.pdf'}
                     </span>
-                    <span className="text-[10px] text-gray-500 uppercase">
-                      {message.file.mimeType.includes('pdf') ? 'PDF Document' : 
-                       message.file.mimeType.includes('word') || message.file.mimeType.includes('doc') ? 'Word Document' :
-                       message.file.mimeType.includes('text') ? 'Text File' : 'Document'}
-                    </span>
+                    <span className="text-[10px] text-gray-500 uppercase">PDF Document</span>
                   </div>
                 </div>
               )}
@@ -98,7 +81,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           <div className={cn(
             "text-sm leading-relaxed",
             isBot 
-              ? "text-gray-200 px-0 py-1" 
+              ? "theme-text px-0 py-1" 
               : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
           )}>
             {isBot && message.webSearchUsed && (
@@ -109,12 +92,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             )}
             <div className="markdown-body">
               {/* --- NAYA CODE SIRF YAHAN ADD KIYA HAI --- */}
-              {isBot && message.text.includes('[SEARCH_IMAGE:') ? (
-                // SEARCH_IMAGE tag not yet processed — strip it and show text only
-                <ReactMarkdown>{message.text.replace(/\[SEARCH_IMAGE:.*?\]/g, '').trim()}</ReactMarkdown>
-              ) : isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
+              {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                 <div className="flex flex-col gap-3 mt-1">
-                  <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
+                  <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={message.text.replace('YETI_IMAGE_URL:', '')} 
@@ -133,51 +113,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                   </div>
                   <p className="text-[10px] text-gray-500 italic">YetiAI ne yeh image aapke liye banayi hai.</p>
                 </div>
-              ) : message.text.includes('YETI_WEB_IMAGE:') ? (
-                (() => {
-                  // Split on YETI_WEB_IMAGE: tag
-                  const splitIdx = message.text.indexOf('YETI_WEB_IMAGE:');
-                  const textPart = message.text.substring(0, splitIdx).trim();
-                  const imgPart = message.text.substring(splitIdx + 'YETI_WEB_IMAGE:'.length);
-                  // imgPart format: url|photographer|query
-                  // Use §§ as separator (safe with URLs)
-                  const parts = imgPart.split('§§');
-                  const imgUrl = parts[0] || '';
-                  const photographer = parts[1] || 'Pexels';
-                  const query = (parts[2] || '').trim();
-                  if (!imgUrl) return <ReactMarkdown>{message.text}</ReactMarkdown>;
-                  return (
-                    <div className="flex flex-col gap-3">
-                      {textPart && (
-                        <div className="markdown-body">
-                          <ReactMarkdown>{textPart}</ReactMarkdown>
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-2 mt-1">
-                        <div className="relative group rounded-xl overflow-hidden border border-white/10 shadow-2xl max-w-lg">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={imgUrl}
-                            alt={query}
-                            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <a
-                              href={imgUrl}
-                              target="_blank"
-                              className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
-                            >
-                              Full Size Dekho 🔍
-                            </a>
-                          </div>
-                        </div>
-                        <p className="text-[10px] text-gray-500 italic">
-                          📷 Photo by <span className="text-gray-400">{photographer}</span> on Unsplash
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })()
               ) : (
                 <ReactMarkdown>{message.text}</ReactMarkdown>
               )}
@@ -195,7 +130,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[11px] text-gray-400 hover:text-white transition-all group"
+                    className="flex items-center gap-2 px-3 py-1.5 theme-hover border theme-border rounded-lg text-[11px] theme-muted hover:text-foreground transition-all group"
                   >
                     <span className="truncate max-w-[150px]">{source.title}</span>
                     <ExternalLink size={10} className="group-hover:text-accent" />
@@ -208,4 +143,4 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-          }
+              }
