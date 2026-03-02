@@ -106,4 +106,13 @@ body {
 .theme-muted { color: var(--text-muted); }
 .theme-hover:hover { background: var(--hover-bg); }
 .theme-input { background: var(--input-bg); }
-                                 
+
+/* ─── Logo fix for light mode ─── */
+:root.light .dark-logo {
+  filter: brightness(0);
+}
+
+/* ─── Welcome screen logo fix ─── */
+:root.light .welcome-logo {
+  filter: brightness(0) opacity(0.15);
+}
