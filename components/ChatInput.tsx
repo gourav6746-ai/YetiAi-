@@ -140,25 +140,25 @@ export default function ChatInput({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-white/10 rounded-t-[32px] z-50 p-6 pb-10 shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 theme-card border-t theme-border rounded-t-[32px] z-50 p-6 pb-10 shadow-2xl"
             >
-              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
+              <div className="w-12 h-1.5 bg-black/20 rounded-full mx-auto mb-6" />
               <div className="flex flex-col gap-2">
-                <button onClick={() => galleryInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-2xl transition-all active:scale-[0.98]">
+                <button onClick={() => galleryInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 theme-hover rounded-2xl transition-all active:scale-[0.98]">
                   <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><ImageIcon size={20} /></div>
                   <span className="font-medium">Photos</span>
                 </button>
-                <button onClick={() => cameraInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-2xl transition-all active:scale-[0.98]">
+                <button onClick={() => cameraInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 theme-hover rounded-2xl transition-all active:scale-[0.98]">
                   <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400"><Camera size={20} /></div>
                   <span className="font-medium">Camera</span>
                 </button>
-                <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-2xl transition-all active:scale-[0.98]">
+                <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-4 w-full p-4 theme-hover rounded-2xl transition-all active:scale-[0.98]">
                   <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400"><FileText size={20} /></div>
                   <span className="font-medium">Files</span>
                 </button>
                 <button
                   onClick={() => { setWebSearchEnabled(!webSearchEnabled); setIsMenuOpen(false); }}
-                  className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-2xl transition-all active:scale-[0.98]"
+                  className="flex items-center gap-4 w-full p-4 theme-hover rounded-2xl transition-all active:scale-[0.98]"
                 >
                   <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-all", webSearchEnabled ? "bg-blue-500 text-white" : "bg-blue-500/20 text-blue-400")}>
                     <Globe size={20} />
@@ -174,10 +174,10 @@ export default function ChatInput({
         )}
       </AnimatePresence>
 
-      <form onSubmit={handleSubmit} className="relative bg-[#151515] border border-white/10 rounded-2xl shadow-2xl overflow-hidden focus-within:border-accent/50 transition-all">
+      <form onSubmit={handleSubmit} className="relative theme-card border theme-border rounded-2xl shadow-2xl overflow-hidden focus-within:border-accent/50 transition-all">
         <AnimatePresence>
           {attachedFile && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-3 border-b border-white/5 bg-black/20">
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="p-3 border-b theme-border bg-black/10">
               <div className="relative inline-block">
                 {attachedFile.mimeType.startsWith('image/') ? (
                   <div className="relative h-20 w-20">
@@ -199,7 +199,7 @@ export default function ChatInput({
 
         <div className="flex items-center p-2">
           {/* Plus button */}
-          <button type="button" onClick={() => setIsMenuOpen(true)} className="p-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all shrink-0 active:scale-90" disabled={disabled}>
+          <button type="button" onClick={() => setIsMenuOpen(true)} className="p-3 theme-muted hover:text-foreground theme-hover rounded-xl transition-all shrink-0 active:scale-90" disabled={disabled}>
             <Plus size={20} />
           </button>
 
@@ -221,7 +221,7 @@ export default function ChatInput({
               }}
               placeholder={isListening ? "🎤 Bol raha hun..." : "YetiAI लाई केहि सोध्नुहोस्..."}
               className={cn(
-                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none",
+                "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none max-h-32 min-h-[44px] outline-none theme-text placeholder:text-gray-400",
                 webSearchEnabled ? "pl-10" : "pl-2"
               )}
               rows={1}
@@ -259,4 +259,5 @@ export default function ChatInput({
     </div>
   );
         }
-                    
+
+            
