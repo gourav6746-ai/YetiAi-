@@ -117,8 +117,7 @@ export const getNepalWeather = async (city: string = 'Kathmandu'): Promise<strin
     const humidity = data.main?.humidity;
     const desc = data.weather?.[0]?.description;
     const wind = data.wind?.speed;
-    return `🌤️ **${city} ka Mausam:**
-- 🌡️ Temperature: **${temp}°C** (feels like ${feels}°C)
+    return `🌤️ **${city} ka Mausam:**\n- 🌡️ Temperature: **${temp}°C** (feels like ${feels}°C)
 - 💧 Humidity: ${humidity}%
 - 🌬️ Wind: ${wind} m/s
 - ☁️ Sky: ${desc}`;
@@ -141,10 +140,8 @@ export const getNPRExchangeRate = async (fromCurrency: string, amount: number): 
     const converted = (amount * rates[to]).toFixed(2);
     const usd = (amount * rates['USD']).toFixed(4);
     const inr = (amount * rates['INR']).toFixed(2);
-    return `💱 **NPR Currency Converter:**
-- 🇳🇵 ${amount} NPR = **${converted} ${to}**
-- 🇺🇸 ${amount} NPR = ${usd} USD
-- 🇮🇳 ${amount} NPR = ${inr} INR`;
+    return `💱 **NPR Currency Converter:**\n- 🇳🇵 ${amount} NPR = **${converted} ${to}**
+- 🇺🇸 ${amount} NPR = ${usd} USD\n- 🇮🇳 ${amount} NPR = ${inr} INR`;
   } catch (e) {
     return "Currency convert karne mein error aaya.";
   }
@@ -161,10 +158,8 @@ export const getNepalNews = async (): Promise<string> => {
     if (!data.items?.length) throw new Error("No items");
     const headlines = data.items.slice(0, 5).map((item: any, i: number) => 
       `${i + 1}. **${item.title}**`
-    ).join('
-');
-    return `📰 **Nepal Ki Taza Khabrein (Kathmandu Post):**
-${headlines}`;
+    ).join('\n');
+    return `📰 **Nepal Ki Taza Khabrein (Kathmandu Post):**\n${headlines}`;
   } catch (e) {
     // Fallback to another RSS
     try {
@@ -174,10 +169,8 @@ ${headlines}`;
       const data2 = await res2.json();
       const headlines2 = data2.items?.slice(0, 5).map((item: any, i: number) => 
         `${i + 1}. **${item.title}**`
-      ).join('
-') || "Khabrein load nahi ho sakin.";
-      return `📰 **Nepal Ki Taza Khabrein:**
-${headlines2}`;
+      ).join('\n') || "Khabrein load nahi ho sakin.";
+      return `📰 **Nepal Ki Taza Khabrein:**\n${headlines2}`;
     } catch {
       return "Nepal news abhi load nahi ho saki. Baad mein try karein.";
     }
@@ -465,4 +458,4 @@ export const getGeminiModel = () => {
       .map((p: any) => p.text)
       .join("\n");
 
-    const messages: ChatCompletionMessageParam[] 
+    const messages: ChatCompletionMessageP
