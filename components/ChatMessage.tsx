@@ -1,4 +1,5 @@
 'use client';
+
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save } from 'lucide-react';
@@ -17,10 +18,10 @@ interface ChatMessageProps {
   onEdit?: (newText: string) => void;
 }
 
-// Code block with copy button - FIXED for layout
+// Code block with copy button
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(children).then(() => {
       setCopied(true);
@@ -31,7 +32,7 @@ function CodeBlock({ children, className }: { children: string; className?: stri
   const language = className?.replace('language-', '') || '';
 
   return (
-    <div className="relative group my-3 rounded-xl overflow-hidden border border-white/10 max-w-full">
+    <div className="relative group my-3 rounded-xl overflow-hidden border border-white/10">
       <div className="flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10">
         <span className="text-[11px] text-gray-400 font-mono uppercase tracking-wider">
           {language || 'code'}
@@ -47,14 +48,14 @@ function CodeBlock({ children, className }: { children: string; className?: stri
             </>
           ) : (
             <>
-              <Copy size={12} />              <span>Copy</span>
+              <Copy size={12} />
+              <span>Copy</span>
             </>
           )}
         </button>
       </div>
-      {/* FIXED: Added overflow-x-auto and max-w-full */}
-      <pre className="overflow-x-auto overflow-y-hidden p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed max-w-full w-full">
-        <code className="block whitespace-pre break-words max-w-full">{children}</code>
+      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed">
+        <code>{children}</code>
       </pre>
     </div>
   );
@@ -90,13 +91,13 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       )}
     >
       <div className={cn(
-        "flex max-w-[85%] md:max-w-[75%] gap-4 w-full",
+        "flex max-w-[85%] md:max-w-[75%] gap-4",
         isBot ? "flex-row" : "flex-row-reverse"
       )}>
-        {/* Avatar */}
         <div className={cn(
           "shrink-0 flex items-center justify-center",
-          isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"        )}>
+          isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"
+        )}>
           {isBot ? (
             <Image src="/logo.png" alt="YetiAI" width={40} height={40} className="object-contain" />
           ) : (
@@ -104,12 +105,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
           )}
         </div>
 
-        {/* Message Content */}
-        <div className={cn("flex flex-col gap-2 min-w-0 flex-1", isBot ? "items-start" : "items-end")}>
-          
-          {/* File Attachment */}
+        <div className={cn("flex flex-col gap-2 min-w-0", isBot ? "items-start" : "items-end")}>
           {message.file && (
-            <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm w-full">
+            <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={message.file.data} alt="Uploaded" className="w-full object-cover max-h-64" />
@@ -129,13 +127,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             </div>
           )}
 
-          {/* Message Bubble */}
           <div className={cn(
-            "text-sm leading-relaxed w-full max-w-full overflow-hidden",
+            "text-sm leading-relaxed w-full",
             isBot ? "theme-text px-0 py-1" : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
           )}>
-            
-            {/* Web Search Badge */}
             {isBot && message.webSearchUsed && (
               <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full w-fit border border-blue-500/20">
                 <Globe size={12} />
@@ -143,9 +138,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               </div>
             )}
 
-            {/* Edit Mode */}
             {!isBot && isEditing ? (
-              <div className="flex flex-col gap-2">                <textarea
+              <div className="flex flex-col gap-2">
+                <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   className="bg-white/10 text-white rounded-xl p-2 text-sm w-full min-w-[200px] outline-none border border-white/20 resize-none"
@@ -162,11 +157,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 </div>
               </div>
             ) : (
-              /* Markdown Content - FIXED */
-              <div className="markdown-body select-text break-words max-w-full overflow-hidden">
+              <div className="markdown-body select-text">
                 {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                   <div className="flex flex-col gap-3 mt-1">
-                    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg w-full">
+                    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={message.text.replace('YETI_IMAGE_URL:', '')}
@@ -179,7 +173,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                           target="_blank"
                           className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
                         >
-                          Download Image 🏔️
+                          Download Image ðŸ”ï¸
                         </a>
                       </div>
                     </div>
@@ -192,9 +186,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                         const isInline = !className;
                         if (isInline) {
                           return (
-                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono break-words max-w-full" {...props}>
+                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono" {...props}>
                               {children}
-                            </code>                          );
+                            </code>
+                          );
                         }
                         return (
                           <CodeBlock className={className}>
@@ -204,33 +199,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                       },
                       pre({ children }: any) {
                         return <>{children}</>;
-                      },
-                      // FIXED: Add these to prevent layout breaking
-                      p({ children }: any) {
-                        return <p className="mb-4 break-words max-w-full">{children}</p>;
-                      },
-                      img({ src, alt }: any) {
-                        return (
-                          <img 
-                            src={src} 
-                            alt={alt} 
-                            className="max-w-full h-auto rounded-lg my-2" 
-                          />
-                        );
-                      },
-                      table({ children }: any) {
-                        return (
-                          <div className="overflow-x-auto my-2 w-full max-w-full">
-                            <table className="w-full border-collapse">{children}</table>
-                          </div>
-                        );
-                      },
-                      th({ children }: any) {
-                        return <th className="border theme-border p-2 text-left">{children}</th>;
-                      },
-                      td({ children }: any) {
-                        return <td className="border theme-border p-2 break-words">{children}</td>;
-                      },
+                      }
                     }}
                   >
                     {message.text}
@@ -240,10 +209,11 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             )}
           </div>
 
-          {/* Action Buttons - show on hover */}
+          {/* Action buttons - show on hover */}
           {!isEditing && (
             <div className={cn(
-              "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",              isBot ? "self-start" : "self-end"
+              "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
+              isBot ? "self-start" : "self-end"
             )}>
               <button
                 onClick={handleCopyMessage}
@@ -253,6 +223,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                 <span>{copied ? 'Copied!' : 'Copy'}</span>
               </button>
+
               {!isBot && (
                 <button
                   onClick={() => { setEditText(message.text); setIsEditing(true); }}
@@ -266,9 +237,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             </div>
           )}
 
-          {/* Sources */}
           {isBot && message.sources && message.sources.length > 0 && (
-            <div className="mt-2 flex flex-col gap-2 w-full max-w-full">
+            <div className="mt-2 flex flex-col gap-2 w-full">
               <p className="text-[10px] font-bold theme-muted uppercase tracking-widest px-1">Sources:</p>
               <div className="flex flex-wrap gap-2">
                 {message.sources.map((source, i) => (
@@ -277,7 +247,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-1.5 theme-hover border theme-border rounded-lg text-[11px] theme-muted hover:text-foreground transition-all group max-w-full"
+                    className="flex items-center gap-2 px-3 py-1.5 theme-hover border theme-border rounded-lg text-[11px] theme-muted hover:text-foreground transition-all group"
                   >
                     <span className="truncate max-w-[150px]">{source.title}</span>
                     <ExternalLink size={10} className="group-hover:text-accent" />
@@ -290,4 +260,5 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-                                  }
+                            }
+            
