@@ -10,7 +10,7 @@ interface ChatMessageProps {
   message: {
     role: 'user' | 'model';
     text: string;
-    file?: { data: string; mimeType: string; name?: string };
+    file?: {  string; mimeType: string; name?: string };
     webSearchUsed?: boolean;
     sources?: { title: string; url: string }[];
   };
@@ -177,24 +177,25 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                     components={{
                       code({ className, children, ...props }: any) {
                         const isInline = !className;
+                        const content = Array.isArray(children) ? children.join('') : String(children);
                         if (isInline) {
                           return (
                             <code className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-1.5 py-0.5 rounded text-[13px] font-mono font-semibold" {...props}>
-                              {children}
+                              {content}
                             </code>
                           );
                         }
                         return (
                           <CodeBlock className={className}>
-                            {String(children).replace(/\n$/, '')}
+                            {content.replace(/\n$/, '')}
                           </CodeBlock>
                         );
                       },
                       pre({ children }: any) {
                         return <>{children}</>;
                       }
-                    }}
-                  >                    {message.text}
+                    }}                  >
+                    {String(message.text)}
                   </ReactMarkdown>
                 )}
               </div>
@@ -242,11 +243,11 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                     <span className="truncate max-w-[150px]">{source.title}</span>
                     <ExternalLink size={10} className="group-hover:text-accent" />
                   </a>
-                ))}
-              </div>            </div>
+                ))}              </div>
+            </div>
           )}
         </div>
       </div>
     </motion.div>
   );
-}
+          }
