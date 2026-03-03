@@ -158,12 +158,12 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               </div>
             ) : (
               <div className="markdown-body select-text">
-                {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
+                {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
                   <div className="flex flex-col gap-3 mt-1">
                     <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={message.text.replace('YETI_IMAGE_URL:', '')}
+                        src={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '')}
                         alt="YetiAI Generated"
                         className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                       />
