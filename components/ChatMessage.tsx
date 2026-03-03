@@ -159,27 +159,27 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             ) : (
               <div className="markdown-body select-text">
                 {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
-                  <div className="flex flex-col gap-3 mt-1">
-                    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '')}
-                        alt="YetiAI Generated"
-                        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <a
-                          href={message.text.replace('YETI_IMAGE_URL:', '')}
-                          target="_blank"
-                          className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
-                        >
-                          Download Image ðŸ”ï¸
-                        </a>
-                      </div>
-                    </div>
-                    <p className="text-[10px] theme-muted italic">YetiAI ne yeh image aapke liye banayi hai.</p>
-                  </div>
-                ) : (
+  <div className="flex flex-col gap-3 mt-1">
+    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
+        alt="YetiAI Generated"
+        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <a
+          href={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
+          target="_blank"
+          className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+        >
+          Download Image 🏔️
+        </a>
+      </div>
+    </div>
+    <p className="text-[10px] theme-muted italic">YetiAI ne yeh image aapke liye banayi hai.</p>
+  </div>
+) : (
                   <ReactMarkdown
                     components={{
                       code({ className, children, ...props }: any) {
