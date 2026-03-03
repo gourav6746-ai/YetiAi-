@@ -17,7 +17,7 @@ interface ChatMessageProps {
   onEdit?: (newText: string) => void;
 }
 
-// Code block with copy button - FIXED
+// Code block with copy button
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const [copied, setCopied] = useState(false);
   
@@ -52,7 +52,6 @@ function CodeBlock({ children, className }: { children: string; className?: stri
           )}
         </button>
       </div>
-      {/* FIXED: Added overflow handling */}
       <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed max-w-full w-full">
         <code className="block whitespace-pre break-words max-w-full">{children}</code>
       </pre>
@@ -96,8 +95,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
         <div className={cn(
           "shrink-0 flex items-center justify-center",
           isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"
-        )}>          {isBot ? (
-            <Image src="/logo.png" alt="YetiAI" width={40} height={40} className="object-contain" />
+        )}>
+          {isBot ? (            <Image src="/logo.png" alt="YetiAI" width={40} height={40} className="object-contain" />
           ) : (
             <User size={16} className="text-white" />
           )}
@@ -125,7 +124,6 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             </div>
           )}
 
-          {/* FIXED: Added overflow-hidden and max-w-full */}
           <div className={cn(
             "text-sm leading-relaxed w-full max-w-full overflow-hidden",
             isBot ? "theme-text px-0 py-1" : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
@@ -145,9 +143,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                   className="bg-white/10 text-white rounded-xl p-2 text-sm w-full min-w-[200px] outline-none border border-white/20 resize-none"
                   rows={3}
                   autoFocus
-                />                <div className="flex gap-2 justify-end">
-                  <button onClick={() => setIsEditing(false)} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all">
-                    <X size={14} />
+                />
+                <div className="flex gap-2 justify-end">
+                  <button onClick={() => setIsEditing(false)} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all">                    <X size={14} />
                   </button>
                   <button onClick={handleSaveEdit} className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-all">
                     <Save size={14} />
@@ -155,7 +153,6 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 </div>
               </div>
             ) : (
-              
               <div className="markdown-body select-text break-words max-w-full overflow-hidden">
                 {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                   <div className="flex flex-col gap-3 mt-1">
@@ -194,11 +191,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                           <CodeBlock className={className}>
                             {String(children).replace(/\n$/, '')}
                           </CodeBlock>
-                        );                      },
-                      pre({ children }: any) {
-                        return <>{children}</>;
+                        );
                       },
-                      // FIXED: Added to prevent layout breaking
+                      pre({ children }: any) {
+                        return <>{children}</>;                      },
                       p({ children }: any) {
                         return <p className="mb-4 break-words max-w-full">{children}</p>;
                       },
@@ -243,11 +239,11 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               </button>
               {!isBot && (
                 <button
-                  onClick={() => { setEditText(message.text); setIsEditing(true); }}                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
+                  onClick={() => { setEditText(message.text); setIsEditing(true); }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
                   title="Edit message"
                 >
-                  <Edit2 size={12} />
-                  <span>Edit</span>
+                  <Edit2 size={12} />                  <span>Edit</span>
                 </button>
               )}
             </div>
@@ -276,4 +272,4 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-      }
+                }
