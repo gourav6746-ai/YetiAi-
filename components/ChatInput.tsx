@@ -225,7 +225,7 @@ export default function ChatInput({
                   handleSubmit(e);
                 }
               }}
-              placeholder={isListening ? "ðŸŽ¤ Bol raha hun..." : "YetiAI à¤²à¤¾à¤ˆ à¤•à¥‡à¤¹à¤¿ à¤¸à¥‹à¤§à¥à¤¨à¥à¤¹à¥‹à¤¸à¥..."}
+              placeholder={isListening ? "reading" : "Ask YetiAi"}
               className={cn(
                 "w-full bg-transparent border-none focus:ring-0 text-sm py-3 resize-none outline-none theme-text placeholder:theme-muted leading-relaxed",
                 "max-h-[120px] overflow-y-auto",
