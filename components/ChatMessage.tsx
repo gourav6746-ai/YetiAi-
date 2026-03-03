@@ -174,16 +174,24 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                   </div>
                 ) : (
                   <ReactMarkdown
-                    components={{
-                      code({ className, children, ...props }: any) {
-                        const isInline = !className;
-                        const content = Array.isArray(children) ? children.join('') : String(children);
-                        if (isInline) {
-                          return (
-                            <code className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-1.5 py-0.5 rounded text-[13px] font-mono font-semibold" {...props}>
-                              {content}
-                            </code>
-                          );
+  children={String(message.text)}
+  components={{
+                code({ className, children, ...props }: any) {
+  const content = String(children);
+  const isInline = !className;
+  if (isInline) {
+    return (
+      <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono" {...props}>
+        {content}
+      </code>
+    );
+  }
+  return (
+    <CodeBlock className={className}>
+      {content.replace(/\n$/, '')}
+    </CodeBlock>
+  );
+},
                         }
                         return (
                           <CodeBlock className={className}>
