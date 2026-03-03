@@ -155,7 +155,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 </div>
               </div>
             ) : (
-              /* FIXED: Added overflow handling to markdown-body */}
+              
               <div className="markdown-body select-text break-words max-w-full overflow-hidden">
                 {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                   <div className="flex flex-col gap-3 mt-1">
