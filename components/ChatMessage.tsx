@@ -1,7 +1,7 @@
 'use client';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
-import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save, Select } from 'lucide-react';
+import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useState, useCallback, useRef } from 'react';
