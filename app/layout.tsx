@@ -1,18 +1,4 @@
 import VideoLogo from '@/components/VideoLogo';
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en">
-      <body>
-        <VideoLogo />  {/* ✅ Ye line add karo */}
-        {children}
-      </body>
-    </html>
-  );
-}
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
