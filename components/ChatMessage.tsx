@@ -1,17 +1,16 @@
 'use client';
-
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
-import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save } from 'lucide-react';
+import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save, Select } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 interface ChatMessageProps {
   message: {
     role: 'user' | 'model';
     text: string;
-    file?: { data: string; mimeType: string; name?: string };
+    file?: {  string; mimeType: string; name?: string };
     webSearchUsed?: boolean;
     sources?: { title: string; url: string }[];
   };
@@ -21,7 +20,7 @@ interface ChatMessageProps {
 // Code block with copy button
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const [copied, setCopied] = useState(false);
-
+  
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(children).then(() => {
       setCopied(true);
@@ -48,8 +47,7 @@ function CodeBlock({ children, className }: { children: string; className?: stri
             </>
           ) : (
             <>
-              <Copy size={12} />
-              <span>Copy</span>
+              <Copy size={12} />              <span>Copy</span>
             </>
           )}
         </button>
@@ -66,6 +64,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.text);
+  const messageElementRef = useRef<HTMLDivElement>(null);
 
   const handleCopyMessage = useCallback(() => {
     navigator.clipboard.writeText(message.text).then(() => {
@@ -73,6 +72,15 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       setTimeout(() => setCopied(false), 2000);
     });
   }, [message.text]);
+
+  const handleSelectText = useCallback(() => {
+    if (messageElementRef.current) {
+      const range = document.createRange();
+      range.selectNode(messageElementRef.current);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
+    }
+  }, []);
 
   const handleSaveEdit = () => {
     if (onEdit && editText.trim()) {
@@ -83,12 +91,12 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
 
   return (
     <motion.div
+      ref={messageElementRef}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
         "flex w-full mb-8 gap-4 px-4 md:px-0 group",
-        isBot ? "justify-start" : "justify-end"
-      )}
+        isBot ? "justify-start" : "justify-end"      )}
     >
       <div className={cn(
         "flex max-w-[85%] md:max-w-[75%] gap-4",
@@ -137,7 +145,6 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 <span className="text-[10px] font-bold uppercase tracking-wider">Web Search used</span>
               </div>
             )}
-
             {!isBot && isEditing ? (
               <div className="flex flex-col gap-2">
                 <textarea
@@ -158,28 +165,28 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               </div>
             ) : (
               <div className="markdown-body select-text">
-    {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
-  <div className="flex flex-col gap-3 mt-1">
-    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
-        alt="YetiAI Generated"
-        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-        <a
-          href={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
-          target="_blank"
-          className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
-        >
-          Download Image 🏔️
-        </a>
-      </div>
-    </div>
-    <p className="text-[10px] theme-muted italic">YetiAI ne yeh image aapke liye banayi hai.</p>
-  </div>
-) : (
+                {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
+                  <div className="flex flex-col gap-3 mt-1">
+                    <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
+                        alt="YetiAI Generated"
+                        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <a
+                          href={message.text.replace('YETI_IMAGE_URL:', '').replace('YETI_WEB_IMAGE:', '').split('§§')[0]}
+                          target="_blank"
+                          className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                        >
+                          Download Image 🏔️
+                        </a>
+                      </div>
+                    </div>
+                    <p className="text-[10px] theme-muted italic">YetiAI ne yeh image aapke liye banayi hai.</p>
+                  </div>
+                ) : (
                   <ReactMarkdown
                     components={{
                       code({ className, children, ...props }: any) {
@@ -187,8 +194,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                         if (isInline) {
                           return (
                             <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono" {...props}>
-                              {children}
-                            </code>
+                              {children}                            </code>
                           );
                         }
                         return (
@@ -215,6 +221,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
               isBot ? "self-start" : "self-end"
             )}>
+              {/* Copy message button */}
               <button
                 onClick={handleCopyMessage}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
@@ -223,11 +230,20 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                 <span>{copied ? 'Copied!' : 'Copy'}</span>
               </button>
-
+              
+              {/* Select text button */}
+              <button
+                onClick={handleSelectText}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
+                title="Select text"
+              >
+                <span className="text-[10px]">Select</span>
+              </button>
+              
+              {/* Edit button (user messages only) */}
               {!isBot && (
                 <button
-                  onClick={() => { setEditText(message.text); setIsEditing(true); }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
+                  onClick={() => { setEditText(message.text); setIsEditing(true); }}                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
                   title="Edit message"
                 >
                   <Edit2 size={12} />
@@ -260,5 +276,4 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-                            }
-            
+                        }
