@@ -5,7 +5,7 @@
   --color-accent-hover: #B21031;
 }
 
-/* ─── Dark Theme (default) ─── */
+/* â”€â”€â”€ Dark Theme (default) â”€â”€â”€ */
 :root {
   --background: #0a0a0a;
   --foreground: #ededed;
@@ -19,7 +19,7 @@
   --scrollbar: #333;
 }
 
-/* ─── Light Theme ─── */
+/* â”€â”€â”€ Light Theme â”€â”€â”€ */
 :root.light {
   --background: #f5f5f5;
   --foreground: #111111;
@@ -33,82 +33,11 @@
   --scrollbar: #d1d5db;
 }
 
-/* ✅ NEW: CSS Reset - Layout Fix */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   transition: background 0.2s, color 0.2s;
-  overflow-x: hidden;
-  min-height: 100vh;
-}
-/* ✅ NEW: Hide default file input - Multiple buttons fix */
-input[type="file"] {
-  display: none;
-}
-
-/* ✅ NEW: File input label styling */
-input[type="file"] + label,
-label:has(input[type="file"]) {
-  display: inline-block;
-  padding: 8px 16px;
-  background: var(--accent);
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-input[type="file"] + label:hover,
-label:has(input[type="file"]):hover {
-  background: var(--color-accent-hover);
-}
-
-/* ✅ NEW: Container fixes */
-.container,
-.max-w-\[.*\],
-.w-full {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* ✅ NEW: Input & Textarea fixes */
-input[type="text"],
-input[type="search"],
-textarea {
-  width: 100%;
-  max-width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  padding: 12px 16px;
-  border-radius: 8px;
-  outline: none;
-  font-size: 14px;
-}
-
-input[type="text"]:focus,
-textarea:focus {  border-color: var(--accent);
-}
-
-/* ✅ NEW: Button fixes */
-button {
-  cursor: pointer;
-  border: none;
-  background: transparent;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* Custom Scrollbar */
@@ -117,20 +46,9 @@ button:disabled {
 ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #444; }
 
-/* ─── Markdown Body ─── */
-.markdown-body { 
-  line-height: 1.6; 
-  /* ✅ NEW: Prevent overflow */
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
-}
-
-.markdown-body p { 
-  margin-bottom: 1rem;
-  /* ✅ NEW: Prevent text overflow */
-  word-break: break-word;
-}
+/* â”€â”€â”€ Markdown Body â”€â”€â”€ */
+.markdown-body { line-height: 1.6; }
+.markdown-body p { margin-bottom: 1rem; }
 
 .markdown-body code {
   background: var(--card-bg);
@@ -138,38 +56,24 @@ button:disabled {
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-family: var(--font-mono);
-  /* ✅ NEW: Inline code fix */
-  word-break: break-word;
-  white-space: pre-wrap;
 }
 
 .markdown-body pre {
   background: var(--card-bg);
-  border: 1px solid var(--border);  padding: 1rem;
+  border: 1px solid var(--border);
+  padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
   margin-bottom: 1rem;
-  /* ✅ NEW: Prevent pre overflow */
-  max-width: 100%;
-  width: 100%;
 }
 
-.markdown-body pre code { 
-  background: transparent; 
-  padding: 0; 
-  border: none;
-  /* ✅ NEW: Code block fix */
-  white-space: pre;
-  display: block;
-}
+.markdown-body pre code { background: transparent; padding: 0; border: none; }
 
 .markdown-body h1, .markdown-body h2, .markdown-body h3 {
   font-weight: 700;
   margin-bottom: 0.75rem;
   margin-top: 1rem;
   color: var(--foreground);
-  /* ✅ NEW: Heading overflow fix */
-  word-break: break-word;
 }
 
 .markdown-body h1 { font-size: 1.5rem; }
@@ -181,20 +85,11 @@ button:disabled {
 
 .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
 .markdown-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-.markdown-body li { 
-  margin-bottom: 0.4rem;
-  /* ✅ NEW: List item fix */
-  word-break: break-word;
-}
+.markdown-body li { margin-bottom: 0.4rem; }
+.markdown-body a { color: #DC143C; text-decoration: underline; }
 
-.markdown-body a { 
-  color: #DC143C; 
-  text-decoration: underline;
-  /* ✅ NEW: Link overflow fix */
-  word-break: break-all;
-}
-
-.markdown-body blockquote {  border-left: 3px solid #DC143C;
+.markdown-body blockquote {
+  border-left: 3px solid #DC143C;
   padding-left: 1rem;
   color: var(--text-muted);
   margin-bottom: 1rem;
@@ -202,32 +97,7 @@ button:disabled {
 
 .markdown-body hr { border-color: var(--border); margin: 1rem 0; }
 
-/* ✅ NEW: Image fix in markdown */
-.markdown-body img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 8px;
-}
-
-/* ✅ NEW: Table fix in markdown */
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-  overflow-x: auto;
-  display: block;
-}
-
-.markdown-body th,
-.markdown-body td {
-  border: 1px solid var(--border);
-  padding: 0.5rem;
-  text-align: left;
-  word-break: break-word;
-}
-
-/* ─── Theme-aware utility classes ─── */
+/* â”€â”€â”€ Theme-aware utility classes â”€â”€â”€ */
 .theme-bg { background: var(--background); }
 .theme-sidebar { background: var(--sidebar-bg); }
 .theme-card { background: var(--card-bg); }
@@ -237,48 +107,12 @@ button:disabled {
 .theme-hover:hover { background: var(--hover-bg); }
 .theme-input { background: var(--input-bg); }
 
-/* ─── Logo fix for light mode ─── */
+/* â”€â”€â”€ Logo fix for light mode â”€â”€â”€ */
 :root.light .dark-logo {
   filter: brightness(0);
 }
 
-/* ─── Welcome screen logo fix ─── */
-:root.light .welcome-logo {  filter: brightness(0) opacity(0.15);
+/* â”€â”€â”€ Welcome screen logo fix â”€â”€â”€ */
+:root.light .welcome-logo {
+  filter: brightness(0) opacity(0.15);
 }
-
-/* ✅ NEW: Logo container fix */
-img[src="/logo.png"] {
-  max-width: 200px;
-  height: auto;
-  object-fit: contain;
-}
-
-/* ✅ NEW: Chat container fix */
-.chat-container,
-.messages-container {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* ✅ NEW: Fix overlapping elements */
-.relative {
-  position: relative;
-}
-
-.absolute {
-  position: absolute;
-}
-
-/* ✅ NEW: Flex container fix */
-.flex {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* ✅ NEW: Prevent button stacking */
-button, .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  }
