@@ -158,7 +158,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               </div>
             ) : (
               <div className="markdown-body select-text">
-                {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
+    {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
   <div className="flex flex-col gap-3 mt-1">
     <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
       {/* eslint-disable-next-line @next/next/no-img-element */}
