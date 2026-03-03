@@ -175,3 +175,48 @@ textarea {
   width: 100%;
   max-width: 100%;
   }
+/* Code Block Visibility Fix for Light/Dark Mode */
+.markdown-body pre {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+.markdown-body code {
+  color: var(--foreground);
+}
+
+/* Inline code styling */
+.markdown-body :not(pre) > code {
+  background: rgba(220, 20, 60, 0.1);
+  color: #DC143C;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+/* Dark mode specific code colors */
+:root:not(.light) .markdown-body pre {
+  background: #1a1a1a;
+  border-color: rgba(255,255,255,0.1);
+}
+
+:root:not(.light) .markdown-body :not(pre) > code {
+  background: rgba(220, 20, 60, 0.2);
+  color: #ff6b9d;
+}
+
+/* Light mode specific code colors */
+:root.light .markdown-body pre {
+  background: #f6f8fa;
+  border-color: rgba(0,0,0,0.1);
+}
+
+:root.light .markdown-body :not(pre) > code {
+  background: rgba(220, 20, 60, 0.08);
+  color: #d42a5f;
+}
+
+/* Code block text color fix */
+.markdown-body pre code {
+  color: inherit;
+}
