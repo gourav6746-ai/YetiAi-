@@ -1,5 +1,4 @@
 'use client';
-
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import { User, Globe, ExternalLink, FileText, Copy, Check, Edit2, X, Save } from 'lucide-react';
@@ -18,10 +17,10 @@ interface ChatMessageProps {
   onEdit?: (newText: string) => void;
 }
 
-// Code block with copy button
+// Code block with copy button - FIXED
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const [copied, setCopied] = useState(false);
-
+  
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(children).then(() => {
       setCopied(true);
@@ -32,7 +31,7 @@ function CodeBlock({ children, className }: { children: string; className?: stri
   const language = className?.replace('language-', '') || '';
 
   return (
-    <div className="relative group my-3 rounded-xl overflow-hidden border border-white/10">
+    <div className="relative group my-3 rounded-xl overflow-hidden border border-white/10 max-w-full">
       <div className="flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10">
         <span className="text-[11px] text-gray-400 font-mono uppercase tracking-wider">
           {language || 'code'}
@@ -48,14 +47,14 @@ function CodeBlock({ children, className }: { children: string; className?: stri
             </>
           ) : (
             <>
-              <Copy size={12} />
-              <span>Copy</span>
+              <Copy size={12} />              <span>Copy</span>
             </>
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed">
-        <code>{children}</code>
+      {/* FIXED: Added overflow handling */}
+      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed max-w-full w-full">
+        <code className="block whitespace-pre break-words max-w-full">{children}</code>
       </pre>
     </div>
   );
@@ -97,8 +96,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
         <div className={cn(
           "shrink-0 flex items-center justify-center",
           isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"
-        )}>
-          {isBot ? (
+        )}>          {isBot ? (
             <Image src="/logo.png" alt="YetiAI" width={40} height={40} className="object-contain" />
           ) : (
             <User size={16} className="text-white" />
@@ -127,8 +125,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             </div>
           )}
 
+          {/* FIXED: Added overflow-hidden and max-w-full */}
           <div className={cn(
-            "text-sm leading-relaxed w-full",
+            "text-sm leading-relaxed w-full max-w-full overflow-hidden",
             isBot ? "theme-text px-0 py-1" : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
           )}>
             {isBot && message.webSearchUsed && (
@@ -146,8 +145,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                   className="bg-white/10 text-white rounded-xl p-2 text-sm w-full min-w-[200px] outline-none border border-white/20 resize-none"
                   rows={3}
                   autoFocus
-                />
-                <div className="flex gap-2 justify-end">
+                />                <div className="flex gap-2 justify-end">
                   <button onClick={() => setIsEditing(false)} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all">
                     <X size={14} />
                   </button>
@@ -157,7 +155,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 </div>
               </div>
             ) : (
-              <div className="markdown-body select-text">
+              /* FIXED: Added overflow handling to markdown-body */}
+              <div className="markdown-body select-text break-words max-w-full overflow-hidden">
                 {isBot && message.text.startsWith('YETI_IMAGE_URL:') ? (
                   <div className="flex flex-col gap-3 mt-1">
                     <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
@@ -173,7 +172,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                           target="_blank"
                           className="bg-white/20 backdrop-blur-md text-white text-xs px-4 py-2 rounded-lg border border-white/30 hover:bg-white/40 transition-all"
                         >
-                          Download Image ðŸ”ï¸
+                          Download Image 🏔️
                         </a>
                       </div>
                     </div>
@@ -186,7 +185,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                         const isInline = !className;
                         if (isInline) {
                           return (
-                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono" {...props}>
+                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono break-words max-w-full" {...props}>
                               {children}
                             </code>
                           );
@@ -195,11 +194,30 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                           <CodeBlock className={className}>
                             {String(children).replace(/\n$/, '')}
                           </CodeBlock>
-                        );
-                      },
+                        );                      },
                       pre({ children }: any) {
                         return <>{children}</>;
-                      }
+                      },
+                      // FIXED: Added to prevent layout breaking
+                      p({ children }: any) {
+                        return <p className="mb-4 break-words max-w-full">{children}</p>;
+                      },
+                      img({ src, alt }: any) {
+                        return <img src={src} alt={alt} className="max-w-full h-auto rounded-lg my-2" />;
+                      },
+                      table({ children }: any) {
+                        return (
+                          <div className="overflow-x-auto my-2 w-full max-w-full">
+                            <table className="w-full border-collapse">{children}</table>
+                          </div>
+                        );
+                      },
+                      th({ children }: any) {
+                        return <th className="border theme-border p-2 text-left">{children}</th>;
+                      },
+                      td({ children }: any) {
+                        return <td className="border theme-border p-2 break-words">{children}</td>;
+                      },
                     }}
                   >
                     {message.text}
@@ -223,11 +241,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                 <span>{copied ? 'Copied!' : 'Copy'}</span>
               </button>
-
               {!isBot && (
                 <button
-                  onClick={() => { setEditText(message.text); setIsEditing(true); }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
+                  onClick={() => { setEditText(message.text); setIsEditing(true); }}                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
                   title="Edit message"
                 >
                   <Edit2 size={12} />
@@ -260,5 +276,4 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       </div>
     </motion.div>
   );
-                            }
-            
+      }
