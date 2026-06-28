@@ -10,7 +10,7 @@ interface ChatMessageProps {
   message: {
     role: 'user' | 'model';
     text: string;
-    file?: {  string; mimeType: string; name?: string };
+    file?: { data: string; mimeType: string; name?: string };
     webSearchUsed?: boolean;
     sources?: { title: string; url: string }[];
   };
@@ -47,7 +47,8 @@ function CodeBlock({ children, className }: { children: string; className?: stri
             </>
           ) : (
             <>
-              <Copy size={12} />              <span>Copy</span>
+              <Copy size={12} />
+              <span>Copy</span>
             </>
           )}
         </button>
@@ -96,7 +97,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
       animate={{ opacity: 1, y: 0 }}
       className={cn(
         "flex w-full mb-8 gap-4 px-4 md:px-0 group",
-        isBot ? "justify-start" : "justify-end"      )}
+        isBot ? "justify-start" : "justify-end"
+      )}
     >
       <div className={cn(
         "flex max-w-[85%] md:max-w-[75%] gap-4",
@@ -244,7 +246,8 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
               {/* Edit button (user messages only) */}
               {!isBot && (
                 <button
-                  onClick={() => { setEditText(message.text); setIsEditing(true); }}                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
+                  onClick={() => { setEditText(message.text); setIsEditing(true); }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg theme-hover border theme-border text-[11px] theme-muted hover:theme-text transition-all"
                   title="Edit message"
                 >
                   <Edit2 size={12} />
@@ -272,7 +275,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </motion.div>
