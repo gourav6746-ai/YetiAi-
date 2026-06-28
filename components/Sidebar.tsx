@@ -106,10 +106,16 @@ function SidebarContent() {
             <div className="p-4 flex items-center gap-3 mb-4">
               <div className="relative w-8 h-8 shrink-0">
                 <Image
-                  src="/logo.png"
+                  src="/logo-dark.png"
                   alt="YetiAI Logo"
                   fill
-                  className="object-contain dark-logo"
+                  className="object-contain dark:block hidden"
+                />
+                <Image
+                  src="/logo-light.png"
+                  alt="YetiAI Logo"
+                  fill
+                  className="object-contain dark:hidden block"
                 />
               </div>
               <h1 className="text-xl font-display font-bold">
@@ -234,4 +240,5 @@ export default function Sidebar() {
   if (!mounted) return null;
   return <SidebarContent />;
       }
-                      
+
+      
