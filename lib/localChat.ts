@@ -20,8 +20,8 @@ export interface Chat {
 }
 
 const STORAGE_KEY = 'yetiai_chats';
-const MAX_CHATS = 10;
-const MAX_MESSAGES = 20;
+const MAX_CHATS = 50;  // Increased from 10 to 50 chats
+const MAX_MESSAGES = 500;  // Increased from 20 to 500 messages per chat
 
 // Remove image data before saving to storage
 const stripImages = (messages: Message[]): Message[] => {

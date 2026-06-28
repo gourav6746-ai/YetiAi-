@@ -52,8 +52,8 @@ function CodeBlock({ children, className }: { children: string; className?: stri
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed">
-        <code>{children}</code>
+      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed w-full max-w-full">
+        <code className="block break-words whitespace-pre-wrap">{children}</code>
       </pre>
     </div>
   );
@@ -113,7 +113,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
           )}
         </div>
 
-        <div className={cn("flex flex-col gap-2 min-w-0", isBot ? "items-start" : "items-end")}>
+        <div className={cn("flex flex-col gap-2 min-w-0 max-w-full", isBot ? "items-start" : "items-end")}>
           {message.file && (
             <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
@@ -136,7 +136,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
           )}
 
           <div className={cn(
-            "text-sm leading-relaxed w-full",
+            "text-sm leading-relaxed w-full break-words overflow-hidden",
             isBot ? "theme-text px-0 py-1" : "bg-accent text-white px-4 py-3 rounded-2xl shadow-sm"
           )}>
             {isBot && message.webSearchUsed && (
@@ -164,7 +164,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 </div>
               </div>
             ) : (
-              <div className="markdown-body select-text">
+              <div className="markdown-body select-text w-full overflow-x-auto">
                 {isBot && (message.text.startsWith('YETI_IMAGE_URL:') || message.text.startsWith('YETI_WEB_IMAGE:')) ? (
                   <div className="flex flex-col gap-3 mt-1">
                     <div className="relative group rounded-xl overflow-hidden border theme-border shadow-2xl max-w-lg">
@@ -193,8 +193,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                         const isInline = !className;
                         if (isInline) {
                           return (
-                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono" {...props}>
-                              {children}                            </code>
+                            <code className="bg-black/30 text-pink-300 px-1.5 py-0.5 rounded text-[13px] font-mono break-words" {...props}>
+                              {children}
+                            </code>
                           );
                         }
                         return (
@@ -271,9 +272,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 ))}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </motion.div>
   );
-                        }
+}

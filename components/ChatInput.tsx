@@ -265,9 +265,8 @@ export default function ChatInput({
       </form>
 
       <p className="text-[10px] text-center theme-muted mt-2">
-        Ask Yetiai
+        Ask YetiAI
       </p>
     </div>
   );
-            }
-                                                       
+}
