@@ -125,7 +125,11 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
                 // eslint-disable-next-line @next/next/no-img-element
                 message.file.data ? (
                   <img src={message.file.data} alt="Uploaded" className="w-full object-cover max-h-64 bg-accent/5" />
-                ) : null
+                ) : (
+  <div className="flex items-center gap-2 p-3 theme-muted text-xs">
+    <ImageIcon size={16} />
+    <span>{message.file.name || 'Image'} (reload ke baad preview nahi dikhta)</span>
+  </div>
               ) : (
                 <div className="flex items-center gap-3 p-4 theme-hover rounded-xl border theme-border">
                   <div className="bg-accent/20 p-2 rounded-lg">
