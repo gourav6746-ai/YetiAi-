@@ -29,7 +29,7 @@ const stripImages = (messages: Message[]): Message[] => {
     ...msg,
     file: msg.file ? { 
       ...msg.file, 
-      data: msg.file.data.length < 100000 ? msg.file.data : '' 
+      data:''
     } : undefined
   }));
 };
