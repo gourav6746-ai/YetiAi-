@@ -109,7 +109,10 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
           isBot ? "w-10 h-10" : "w-8 h-8 rounded-lg border theme-border bg-accent/10"
         )}>
           {isBot ? (
-            <Image src="/logo.png" alt="YetiAI" width={40} height={40} className="object-contain" />
+            <>
+              <Image src="/logo-dark.png" alt="YetiAI" width={40} height={40} className="object-contain dark:block hidden" />
+              <Image src="/logo-light.png" alt="YetiAI" width={40} height={40} className="object-contain dark:hidden block" />
+            </>
           ) : (
             <User size={16} className="text-white" />
           )}
@@ -120,7 +123,9 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={message.file.data || '/logo.png'} alt="Uploaded" className="w-full object-cover max-h-64 bg-accent/5" />
+                message.file.data ? (
+                  <img src={message.file.data} alt="Uploaded" className="w-full object-cover max-h-64 bg-accent/5" />
+                ) : null
               ) : (
                 <div className="flex items-center gap-3 p-4 theme-hover rounded-xl border theme-border">
                   <div className="bg-accent/20 p-2 rounded-lg">
