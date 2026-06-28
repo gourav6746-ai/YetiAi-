@@ -23,11 +23,14 @@ const STORAGE_KEY = 'yetiai_chats';
 const MAX_CHATS = 50;  // Increased from 10 to 50 chats
 const MAX_MESSAGES = 500;  // Increased from 20 to 500 messages per chat
 
-// Remove image data before saving to storage
+// Keep image data only if it's reasonably small (under 100KB) to prevent localStorage overflow
 const stripImages = (messages: Message[]): Message[] => {
   return messages.map(msg => ({
     ...msg,
-    file: msg.file ? { ...msg.file, data: '' } : undefined
+    file: msg.file ? { 
+      ...msg.file, 
+      data: msg.file.data.length < 100000 ? msg.file.data : '' 
+    } : undefined
   }));
 };
 

@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
-      <body suppressHydrationWarning className="bg-[#0a0a0a] text-[#ededed] antialiased">
+      <body suppressHydrationWarning className="theme-bg theme-text antialiased">
         {children}
       </body>
     </html>

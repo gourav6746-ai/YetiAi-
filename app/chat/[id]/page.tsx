@@ -163,14 +163,26 @@ function ChatPageContent() {
         const base64Data = attachedFile.data.split(',')[1];
         const mimeType = attachedFile.mimeType;
         
-        const result = await chat.sendMessage({
-          message: [
-            { text: promptText || "Analyze this attachment." },
-            { inlineData: { data: base64Data, mimeType } }
-          ]
-        });
-
-        fullResponse = result.text || "";
+        if (mimeType.startsWith('image/')) {
+          const result = await chat.sendMessage({
+            message: [
+              { text: promptText || "Analyze this image." },
+              { inlineData: { data: base64Data, mimeType } }
+            ]
+          });
+          fullResponse = result.text || "";
+        } else {
+          // For text files, read content and add to prompt
+          let fileContent = "";
+          try {
+            fileContent = atob(base64Data);
+          } catch (e) {
+            fileContent = "[Binary file content]";
+          }
+          const enhancedPrompt = `File Content (${attachedFile.name}):\n${fileContent}\n\nUser Question: ${promptText}`;
+          const result = await chat.sendMessage({ message: enhancedPrompt });
+          fullResponse = result.text || "";
+        }
         await typewriterEffect(fullResponse);
       } else {
         const result = await chat.sendMessage({

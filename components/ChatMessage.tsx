@@ -31,14 +31,14 @@ function CodeBlock({ children, className }: { children: string; className?: stri
   const language = className?.replace('language-', '') || '';
 
   return (
-    <div className="relative group my-3 rounded-xl overflow-hidden border border-white/10">
-      <div className="flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10">
-        <span className="text-[11px] text-gray-400 font-mono uppercase tracking-wider">
+    <div className="relative group my-3 rounded-xl overflow-hidden border theme-border">
+      <div className="flex items-center justify-between px-4 py-2 theme-bg border-b theme-border">
+        <span className="text-[11px] theme-muted font-mono uppercase tracking-wider">
           {language || 'code'}
         </span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-[11px] font-medium"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg theme-hover border theme-border theme-muted hover:theme-text transition-all text-[11px] font-medium"
         >
           {copied ? (
             <>
@@ -53,7 +53,7 @@ function CodeBlock({ children, className }: { children: string; className?: stri
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm bg-black/30 text-gray-100 font-mono leading-relaxed w-full max-w-full">
+      <pre className="overflow-x-auto p-4 text-sm theme-card theme-text font-mono leading-relaxed w-full max-w-full">
         <code className="block break-words whitespace-pre-wrap">{children}</code>
       </pre>
     </div>
@@ -120,7 +120,7 @@ export default function ChatMessage({ message, onEdit }: ChatMessageProps) {
             <div className="rounded-xl overflow-hidden border theme-border mb-2 max-w-sm">
               {message.file.mimeType.startsWith('image/') ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={message.file.data} alt="Uploaded" className="w-full object-cover max-h-64" />
+                <img src={message.file.data || '/logo.png'} alt="Uploaded" className="w-full object-cover max-h-64 bg-accent/5" />
               ) : (
                 <div className="flex items-center gap-3 p-4 theme-hover rounded-xl border theme-border">
                   <div className="bg-accent/20 p-2 rounded-lg">

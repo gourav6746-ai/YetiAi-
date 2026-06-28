@@ -217,6 +217,11 @@ textarea {
 :root.light .markdown-body pre {
   background: #f6f8fa;
   border-color: rgba(0,0,0,0.1);
+  color: #111111;
+}
+
+:root.light .markdown-body pre code {
+  color: #111111;
 }
 
 :root.light .markdown-body :not(pre) > code {
